@@ -60,9 +60,11 @@
 	<key>NSCameraUsageDescription</key>
 	<string>allow camera to upload user profile</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Allow "resortCE" to access your location while in the app to select Hotels</string>
+	<string>Allow &quot;resortCE&quot; to access your location while in the app to select Hotels</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>allow "resortCE" to access your location while in the app to select Hotels</string>
+	<string>allow &quot;resortCE&quot; to access your location while in the app to select Hotels</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>allow &quot;resortCE&quot; to access your location while in the app to select Hotels</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>allow Gallery to upload user profile</string>
 	<key>NSPhotoLibraryUsageDescription</key>

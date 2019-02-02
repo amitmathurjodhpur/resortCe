@@ -14,8 +14,11 @@ import GoogleSignIn
 import Toaster
 
 class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
+    @IBOutlet weak var loginIdTxt: UITextField!
+    @IBOutlet weak var passwordTxtField: UITextField!
     var DeviceToken = ""
 
+    
     override func viewDidLoad() {
         super.viewDidLoad()
          NotificationCenter.default.addObserver(self, selector: #selector(self.loadviewfornotifications), name: NSNotification.Name(rawValue: "styleUser1"), object: nil)
@@ -216,3 +219,35 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
     }
 }
 
+extension LoginVc {
+    @IBAction func LoginAction(_ sender: Any) {
+        let dic = ["email":loginIdTxt.text ,"password":passwordTxtField.text]
+         UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        DataManager.postAPIWithParameters(urlString: API.socialLogin , jsonString: dic as [String : AnyObject], success: {
+            success in
+            print(success)
+             UIApplication.shared.isNetworkActivityIndicatorVisible = false
+//            let dict_sucess = success.value(forKey: "body") as! [String :Any]
+//            let auth_key =  dict_sucess["authorization_key"] as! String
+//            UserDefaults.standard.set(auth_key, forKey: "auth_key")
+//            print(dict_sucess)
+//            print(auth_key)
+////            if let deviceToken = UserDefaults.standard.value(forKey: "DeviceToken") as? String
+////            {
+////                self.DeviceToken = deviceToken
+////
+////            }
+//            UserDefaults.standard.setValue(auth_key, forKey: "authKey")
+//            UserDefaults.standard.set("1", forKey: AppKey.LoginStatus )
+//            User.iswhichUser = "1"
+//            UserDefaults.standard.set("1", forKey: "First")
+//
+//            let vc = self.storyboard?.instantiateViewController(withIdentifier: "HomeVc") as? HomeVc
+//            self.navigationController?.pushViewController(vc!, animated: true)
+        }, failure: {
+            failure in
+             UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            print(failure)
+        })
+    }
+}

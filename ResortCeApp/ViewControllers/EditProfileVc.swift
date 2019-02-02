@@ -12,6 +12,11 @@ import GooglePlaces
 import GooglePlacePicker
 import SDWebImage
 import IQKeyboardManager
+
+protocol NewUserDelegate: class {
+    func newUserCompleted()
+}
+
 class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigationControllerDelegate,CLLocationManagerDelegate,GMSMapViewDelegate,UISearchBarDelegate,UISearchDisplayDelegate{
     @IBOutlet weak var UserImage:   UIImageView!
     @IBOutlet weak var TxtUserName: UITextField!
@@ -40,7 +45,7 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
     var RenewalCyleArray = [String]()
     var RenewalCycleIds = ["1","2","3"]
     var RenewalCyleValueFroAPI = "0"
-    
+    weak var newUserDelegate: NewUserDelegate?
     var profid = ""
     var ProfId2 = ""
     let picker = UIPickerView()
@@ -196,8 +201,10 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
                 ActivityIndicator.shared.hide()
                 let user_dict = sucess.value(forKey: "body") as! [String:Any]
                 print(user_dict)
+               
              //   UserDefaults.standard.set(self.TxtDOB.text, forKey: "dob")
                 User.iswhichUser = ""
+                self.newUserDelegate?.newUserCompleted()
                 self.navigationController?.popViewController(animated: true)
                 UserDefaults.standard.set("0", forKey: "First")
                 

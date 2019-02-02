@@ -11,14 +11,14 @@ import UIKit
 
 //Base URl for the Application
 //live URL
-public let baseURL                  = "http://52.15.160.147/resort-ce/Apis/"
-
+//public let baseURL                  = "http://52.15.160.147/resort-ce/Apis/"
+public let baseURL                  = "http://52.15.160.147/resort-new/apis/"
 //Local URL
 // public let baseURL =  "http://202.164.42.226/dev/resort-ce/Apis/"
 
 public struct API {
     public static let signUp                  =           baseURL+"signup_user"
-    public static let logIn                   =           baseURL+"login"
+    public static let logIn                   =           baseURL+"user-login"
     
     public static let userProfileDetail       =    baseURL+"user_profile_details"
     public static let forgetPassword          =           baseURL+"forgot_password"

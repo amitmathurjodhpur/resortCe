@@ -59,8 +59,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate,GIDSignInDelegate{
             let center  = UNUserNotificationCenter.current()
             center.delegate = self as UNUserNotificationCenterDelegate
             center.requestAuthorization(options: [.alert, .badge, .sound]) { (success, error) in
-                if error == nil{
-                    UIApplication.shared.registerForRemoteNotifications()
+                if error == nil {
+                    DispatchQueue.main.async(execute: {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    })
                 }
             }
         }
