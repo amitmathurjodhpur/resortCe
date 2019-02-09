@@ -11,20 +11,29 @@ import UIKit
 
 //Base URl for the Application
 //live URL
-//public let baseURL                  = "http://52.15.160.147/resort-ce/Apis/"
-public let baseURL                  = "http://52.15.160.147/resort-new/apis/"
+public let baseURL                  = "http://52.15.160.147/resort-ce/Apis/"
+public let newbaseURL                  = "http://52.15.160.147/resort-ce/apis/"
+public let userProfileURL                  = "http://52.15.160.147/resort-ce/admin/apis/"
+public let socialLoginURL                  = "http://52.15.160.147/resort-ce/admin/Apis/"
+
+//public let newbaseURL                  = "http://52.15.160.147/resort_new/apis/"
 //Local URL
 // public let baseURL =  "http://202.164.42.226/dev/resort-ce/Apis/"
 
 public struct API {
-    public static let signUp                  =           baseURL+"signup_user"
-    public static let logIn                   =           baseURL+"user-login"
+    public static let signUp                  =           newbaseURL+"user-register.php"
+    public static let logIn                   =           newbaseURL+"user-login.php"
+    public static let createTrip              =           newbaseURL+"create-trip.php"
+    public static let getCourses              =           newbaseURL+"courses.php"
+    public static let addTripExpenses              =           newbaseURL+"addExpense.php"
+    public static let getTrips              =           newbaseURL+"trips.php"
+    public static let addCourse              =           newbaseURL+"addCourse.php"
     
-    public static let userProfileDetail       =    baseURL+"user_profile_details"
+    public static let userProfileDetail       =    userProfileURL+"user_profile_details"
     public static let forgetPassword          =           baseURL+"forgot_password"
     public static  let lessons_list           =           baseURL+"lessons_list"
     public static let cardPayment             =           baseURL+"card_payment"
-    public static let socialLogin             =           baseURL+"social_login"
+    public static let socialLogin             =           socialLoginURL+"social_login"
     public static let course_listing           =          baseURL+"course_listing"
     public static let one_course_list           =         baseURL+"one_course_list"
     public static let course_add_to_favourite   =      baseURL+"course_add_to_favourite"

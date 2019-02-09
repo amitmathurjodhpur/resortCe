@@ -29,6 +29,18 @@ extension String {
     var html2String: String {
         return html2AttributedString?.string ?? ""
     }
+    func isEmptyOrWhitespace() -> Bool {
+        if(self.isEmpty) {
+            return true
+        }
+        return (self.trimmingCharacters(in: NSCharacterSet.whitespaces) == "")
+    }
+}
+
+extension Double {
+    func toString() -> String {
+        return String(format: "%f",self)
+    }
 }
 
 extension  UITextField{

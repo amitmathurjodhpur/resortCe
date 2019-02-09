@@ -13,28 +13,106 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     let kHeaderSectionTag: Int = 6900
     var expandedSectionHeaderNumber: Int = -1
     var expandedSectionHeader: UITableViewHeaderFooterView!
-    var sectionItems: Array<Any> = []
     var sectionNames: Array<Any> = []
     var shouldShowCurrent: Bool = false
+    var currentTrips: [Trip] = []
+    var inProgressTrips: [Trip] = []
+    var completedTrips: [Trip] = []
+    var inProgressCourses: [Course] = []
+    var completedCourses: [Course] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden  = false
-       
+        tableView.estimatedRowHeight = 44.0
+        tableView.rowHeight = UITableViewAutomaticDimension
         if shouldShowCurrent {
              self.title = "Trip Tracker"
-            sectionNames = [ "Current Courses","In Progress Courses", "Completed Courses"]
-            sectionItems = [ ["Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective"],
-                             ["Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective"], ["Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective"] ]
+            sectionNames = [ "Current Trips","In Progress Trips", "Completed Trips"]
+            getTripList()
         } else {
              self.title = "CE Tracker"
             sectionNames = [ "In Progress Courses", "Completed Courses"]
-            sectionItems = [ ["Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective"], ["Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective", "Achieving Scale with the Reach Objective"] ]
+            getCourseList()
         }
        
         self.tableView!.tableFooterView = UIView()
     }
    
+    func getTripList() {
+        if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
+            ActivityIndicator.shared.show(self.view)
+            // let dic = ["user_id": userId]
+            let dic = ["user_id": "184"]
+            print("Dict: \n\(dic)")
+            DataManager.postAPIWithParameters(urlString: API.getTrips , jsonString: dic as [String : AnyObject], success: {
+                success in
+                print(success)
+                ActivityIndicator.shared.hide()
+                if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
+                    print(response.count)
+                    for tripObj in response {
+                        if let trip = tripObj as Dictionary<String, AnyObject>?, let tripId = trip["id"] as? String, let tripName = trip["name"] as? String, let status = trip["status"] as? String, let tDate = trip["date"] as? String {
+                            let trip = Trip.init(tripeId: tripId, tripName: tripName, status: status, tripDate: tDate)
+                            if status == "1" {
+                                self.inProgressTrips.append(trip)
+                            } else if status == "0" {
+                                self.currentTrips.append(trip)
+                            } else if status == "2" {
+                                self.completedTrips.append(trip)
+                            }
+                        }
+                    }
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                } else {
+                    UIAlertController.show(self, "ResortCe", "No Results Found")
+                }
+            }, failure: {
+                failure in
+                ActivityIndicator.shared.hide()
+                print(failure)
+            })
+        }
+        
+    }
+    
+    func getCourseList() {
+        if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
+            ActivityIndicator.shared.show(self.view)
+            // let dic = ["user_id": userId]
+            let dic = ["user_id": "184"]
+            print("Dict: \n\(dic)")
+            DataManager.postAPIWithParameters(urlString: API.getCourses , jsonString: dic as [String : AnyObject], success: {
+                success in
+                print(success)
+                ActivityIndicator.shared.hide()
+                if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
+                    for courseObj in response {
+                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String {
+                            let course = Course.init(courseId: courseId, courseName: courseName, status: status)
+                            if status == "0" {
+                                self.inProgressCourses.append(course)
+                            } else if status == "1" {
+                                self.completedCourses.append(course)
+                            }
+                        }
+                    }
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                } else {
+                    UIAlertController.show(self, "ResortCe", "No Results Found")
+                }
+            }, failure: {
+                failure in
+                ActivityIndicator.shared.hide()
+                print(failure)
+            })
+        }
+    }
+    
     func numberOfSections(in tableView: UITableView) -> Int {
         if sectionNames.count > 0 {
             tableView.backgroundView = nil
@@ -53,8 +131,22 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if (self.expandedSectionHeaderNumber == section) {
-            let arrayOfItems = self.sectionItems[section] as! NSArray
-            return arrayOfItems.count
+            if shouldShowCurrent {
+                if section == 0 {
+                    return currentTrips.count
+                } else if section == 1 {
+                    return inProgressTrips.count
+                } else if section == 2 {
+                    return completedTrips.count
+                }
+            } else {
+                if section == 0 {
+                    return inProgressCourses.count
+                } else if section == 1 {
+                    return completedCourses.count
+                }
+            }
+           return 0
         } else {
             return 0
         }
@@ -99,21 +191,48 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "triptrackcell", for: indexPath) as! TripTrackCell
-        let section = self.sectionItems[indexPath.section] as! NSArray
-        
-        cell.textLabel?.textColor = UIColor.black
-        cell.tripTitleLabel?.text = section[indexPath.row] as? String
-        cell.tripTimeLabel?.text = "14 Jan 2018"
-        if indexPath.row % 2 == 0 {
-             cell.tripStatusLabel?.text = "Completed"
-             cell.tripStatusLabel?.textColor = UIColor.green
-        } else {
-             cell.tripStatusLabel?.text = "In Progress"
-            cell.tripStatusLabel?.textColor = UIColor.orange
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "triptrackcell", for: indexPath) as? TripTrackCell {
+            if shouldShowCurrent {
+                if indexPath.section == 0 {
+                    cell.tripTitleLabel?.text = currentTrips[indexPath.row].tripName
+                    cell.tripTimeLabel?.text = currentTrips[indexPath.row].tripDate
+                    cell.tripStatusLabel.isHidden = true
+                    cell.tripStatusLabel?.text = ""
+                } else if indexPath.section == 1 {
+                    cell.tripTitleLabel?.text = inProgressTrips[indexPath.row].tripName
+                    cell.tripTimeLabel?.text = inProgressTrips[indexPath.row].tripDate
+                    cell.tripStatusLabel.isHidden = false
+                    cell.tripStatusLabel?.text = "In Progress"
+                    cell.tripStatusLabel?.textColor = UIColor.orange
+                } else if indexPath.section == 2 {
+                    cell.tripTitleLabel?.text = completedTrips[indexPath.row].tripName
+                    cell.tripTimeLabel?.text = completedTrips[indexPath.row].tripDate
+                    cell.tripStatusLabel.isHidden = false
+                    cell.tripStatusLabel?.text = "Completed"
+                    cell.tripStatusLabel?.textColor = UIColor.green
+                }
+            } else {
+                if indexPath.section == 0 {
+                    cell.tripTitleLabel?.text = inProgressCourses[indexPath.row].courseName
+                    cell.tripTimeLabel?.text = "2019-02-08 21:21:14"
+                    cell.tripStatusLabel.isHidden = false
+                    cell.tripStatusLabel?.text = "In Progress"
+                    cell.tripStatusLabel?.textColor = UIColor.orange
+                    
+                } else if indexPath.section == 1 {
+                    cell.tripTitleLabel?.text = completedCourses[indexPath.row].courseName
+                    cell.tripTimeLabel?.text = "2019-02-08 21:21:14"
+                    cell.tripStatusLabel.isHidden = false
+                    cell.tripStatusLabel?.text = "Completed"
+                    cell.tripStatusLabel?.textColor = UIColor.orange
+                   
+                }
+            }
+            
+            cell.textLabel?.textColor = UIColor.black
+            return cell
         }
-       
-        return cell
+        return UITableViewCell()
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -142,46 +261,110 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableViewCollapeSection(_ section: Int, imageView: UIImageView) {
-        let sectionData = self.sectionItems[section] as! NSArray
-        
         self.expandedSectionHeaderNumber = -1
-        if (sectionData.count == 0) {
-            return
-        } else {
-            UIView.animate(withDuration: 0.4, animations: {
-                imageView.transform = CGAffineTransform(rotationAngle: (0.0 * CGFloat(Double.pi)) / 180.0)
-            })
-            var indexesPath = [IndexPath]()
-            for i in 0 ..< sectionData.count {
-                let index = IndexPath(row: i, section: section)
-                indexesPath.append(index)
+        if shouldShowCurrent {
+             var sectionData: [Trip] = []
+            if section == 0 {
+                sectionData = currentTrips
+            } else if section == 1 {
+                sectionData = inProgressTrips
+            } else if section == 2 {
+                sectionData = completedTrips
             }
-            self.tableView!.beginUpdates()
-            self.tableView!.deleteRows(at: indexesPath, with: UITableViewRowAnimation.fade)
-            self.tableView!.endUpdates()
+            if (sectionData.count == 0) {
+                return
+            } else {
+                UIView.animate(withDuration: 0.4, animations: {
+                    imageView.transform = CGAffineTransform(rotationAngle: (0.0 * CGFloat(Double.pi)) / 180.0)
+                })
+                var indexesPath = [IndexPath]()
+                for i in 0 ..< sectionData.count {
+                    let index = IndexPath(row: i, section: section)
+                    indexesPath.append(index)
+                }
+                self.tableView!.beginUpdates()
+                self.tableView!.deleteRows(at: indexesPath, with: UITableViewRowAnimation.fade)
+                self.tableView!.endUpdates()
+            }
+        } else {
+             var sectionData: [Course] = []
+             if section == 0 {
+                sectionData = inProgressCourses
+            } else if section == 1 {
+                sectionData = completedCourses
+            }
+            if (sectionData.count == 0) {
+                return
+            } else {
+                UIView.animate(withDuration: 0.4, animations: {
+                    imageView.transform = CGAffineTransform(rotationAngle: (0.0 * CGFloat(Double.pi)) / 180.0)
+                })
+                var indexesPath = [IndexPath]()
+                for i in 0 ..< sectionData.count {
+                    let index = IndexPath(row: i, section: section)
+                    indexesPath.append(index)
+                }
+                self.tableView!.beginUpdates()
+                self.tableView!.deleteRows(at: indexesPath, with: UITableViewRowAnimation.fade)
+                self.tableView!.endUpdates()
+            }
         }
+        
     }
     
     func tableViewExpandSection(_ section: Int, imageView: UIImageView) {
-        let sectionData = self.sectionItems[section] as! NSArray
         
-        if (sectionData.count == 0) {
-            self.expandedSectionHeaderNumber = -1
-            return
-        } else {
-            UIView.animate(withDuration: 0.4, animations: {
-                imageView.transform = CGAffineTransform(rotationAngle: (180.0 * CGFloat(Double.pi)) / 180.0)
-            })
-            var indexesPath = [IndexPath]()
-            for i in 0 ..< sectionData.count {
-                let index = IndexPath(row: i, section: section)
-                indexesPath.append(index)
+        if shouldShowCurrent {
+            var sectionData: [Trip] = []
+            if section == 0 {
+                sectionData = currentTrips
+            } else if section == 1 {
+                sectionData = inProgressTrips
+            } else if section == 2 {
+                sectionData = completedTrips
             }
-            self.expandedSectionHeaderNumber = section
-            self.tableView!.beginUpdates()
-            self.tableView!.insertRows(at: indexesPath, with: UITableViewRowAnimation.fade)
-            self.tableView!.endUpdates()
-        }
+            if (sectionData.count == 0) {
+                self.expandedSectionHeaderNumber = -1
+                return
+            } else {
+                UIView.animate(withDuration: 0.4, animations: {
+                    imageView.transform = CGAffineTransform(rotationAngle: (180.0 * CGFloat(Double.pi)) / 180.0)
+                })
+                var indexesPath = [IndexPath]()
+                for i in 0 ..< sectionData.count {
+                    let index = IndexPath(row: i, section: section)
+                    indexesPath.append(index)
+                }
+                self.expandedSectionHeaderNumber = section
+                self.tableView!.beginUpdates()
+                self.tableView!.insertRows(at: indexesPath, with: UITableViewRowAnimation.fade)
+                self.tableView!.endUpdates()
+            }
+        } else {
+            var sectionData: [Course] = []
+            if section == 0 {
+                sectionData = inProgressCourses
+            } else if section == 1 {
+                sectionData = completedCourses
+            }
+            if (sectionData.count == 0) {
+                self.expandedSectionHeaderNumber = -1
+                return
+            } else {
+                UIView.animate(withDuration: 0.4, animations: {
+                    imageView.transform = CGAffineTransform(rotationAngle: (180.0 * CGFloat(Double.pi)) / 180.0)
+                })
+                var indexesPath = [IndexPath]()
+                for i in 0 ..< sectionData.count {
+                    let index = IndexPath(row: i, section: section)
+                    indexesPath.append(index)
+                }
+                self.expandedSectionHeaderNumber = section
+                self.tableView!.beginUpdates()
+                self.tableView!.insertRows(at: indexesPath, with: UITableViewRowAnimation.fade)
+                self.tableView!.endUpdates()
+            }
+        }        
     }
     
     override func didReceiveMemoryWarning() {

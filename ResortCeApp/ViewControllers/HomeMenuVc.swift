@@ -25,7 +25,7 @@ class HomeMenuVc: UIViewController {
         super.viewDidLoad()
         Userimage.layer.cornerRadius = Userimage.frame.height/2
       //  self.PostTotalCredits()
-        self.PostTotalNotification()
+        //self.PostTotalNotification()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -35,24 +35,31 @@ class HomeMenuVc: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-    func userprofile()
-    {
+    
+    func userprofile() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            print("authkey: \(authKey)")
+            print(API.userProfileDetail)
             ActivityIndicator.shared.show(self.view)
-            DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
+            DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()
-                let user_dict = sucess.value(forKey: "body") as! [String:Any]
-                let fname = user_dict["firstname"]as! String
-                let lname = user_dict["lastname"]as! String
-                self.username.text = fname + " " + lname
-                self.userEmail.text = user_dict["email"] as? String
-                let photo = user_dict["image"] as? String
-                self.Userimage.sd_setImage(with: URL(string: photo!), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
+                if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
+                    let fname = userObj["firstname"] as? String
+                    let lname = userObj["lastname"] as? String
+                    self.username.text = (fname ?? "") + " " + (lname ?? "")
+                    self.userEmail.text = userObj["email"] as? String
+                    let photo = userObj["image"] as? String
+                    self.Userimage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
+                }
+               
             }, failure: {
                 fail in
                 ActivityIndicator.shared.hide()
             })
+        }
     }
+    
     func PostTotalCredits()
     {
         ActivityIndicator.shared.show(self.view)

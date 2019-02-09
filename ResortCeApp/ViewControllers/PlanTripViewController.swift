@@ -36,9 +36,19 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     var hotelCurrentLat = 0.0
     var hotelCurrentLong = 0.0
     var type = 1
+    var hotelPhoneNumber: String = ""
+    var hotelID: String = ""
+    var hotelName: String = ""
+    var currentTripId: String = ""
+    var currentImage: UIImage?
+    var courseArr: [Course] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureView()
+    }
+    
+    func configureView() {
         self.navigationController?.isNavigationBarHidden = false
         self.title = "Resortcee"
         
@@ -53,9 +63,87 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
         startDatetxt.delegate = self
         expenseDate.delegate = self
     }
+    
+    @IBAction func nextClick(_ sender: Any) {
+        if let tipText = tipNameTxt.text, !tipText.isEmpty, !hotelName.isEmpty, let startDate = startDatetxt.text, !startDate.isEmpty, let endDate = endDatetxt.text, !endDate.isEmpty, let hotelAddress = hotelNametxt.text {
+            self.view.endEditing(true)
+            ActivityIndicator.shared.show(self.view)
+            let dic = ["trip_name": tipText ,"hotel_name": hotelName, "hotel_address": hotelAddress, "hotel_latitude": hotelCurrentLat.toString(), "hotel_longitude":hotelCurrentLong.toString() ,"start_date":startDate,"end_date":endDate, "hotel_phone":hotelPhoneNumber, "hotel_Id":hotelID]
+            print("Dict: \n\(dic)")
+            DataManager.postAPIWithParameters(urlString: API.createTrip , jsonString: dic as [String : AnyObject], success: {
+                success in
+                print(success)
+                ActivityIndicator.shared.hide()
+                   if let response = success as? Dictionary<String, AnyObject> {
+                    if let status = response["status"] as? Int, status == 1 {
+                        if let tripId = response["trip_id"] as? Int {
+                            self.currentTripId = String(tripId)
+                        }
+                        UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
+                         self?.tipNameView.isHidden = true
+                         self?.courseView.isHidden = false
+                         self?.addExpenseView.isHidden = true
+                         self?.segmentView.selectedSegmentIndex = 1
+                            self?.getCourseList()
+                         })
+                    } else {
+                        if let message = response["message"] as? String {
+                            UIAlertController.show(self, "Error", message)
+                        }
+                    }
+                }
+            }, failure: {
+                failure in
+                ActivityIndicator.shared.hide()
+                print(failure)
+            })
 
+        } else {
+            UIAlertController.show(self, "Error", "All Fields are mandatory")
+        }
+//        UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
+//            self?.tipNameView.isHidden = true
+//            self?.courseView.isHidden = false
+//            self?.addExpenseView.isHidden = true
+//            self?.segmentView.selectedSegmentIndex = 1
+//            self?.getCourseList()
+//        })
+    }
+    
+    func getCourseList() {
+        if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
+            ActivityIndicator.shared.show(self.view)
+           // let dic = ["user_id": userId]
+             let dic = ["user_id": "184"]
+            print("Dict: \n\(dic)")
+            DataManager.postAPIWithParameters(urlString: API.getCourses , jsonString: dic as [String : AnyObject], success: {
+                success in
+                print(success)
+                ActivityIndicator.shared.hide()
+                if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
+                    print(response.count)
+                    for courseObj in response {
+                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String {
+                            let course = Course.init(courseId: courseId, courseName: courseName, status: status)
+                            self.courseArr.append(course)
+                        }
+                    }
+                    print(self.courseArr)
+                    DispatchQueue.main.async {
+                        self.courseTableView.reloadData()
+                    }
+                } else {
+                    UIAlertController.show(self, "ResortCe", "No Results Found")
+                }
+            }, failure: {
+                failure in
+                ActivityIndicator.shared.hide()
+                print(failure)
+            })
+        }
+    }
+    //MARK: - Location Manager
     func getCurrentLocation() {
-        
         if CLLocationManager.locationServicesEnabled() {
             switch CLLocationManager.authorizationStatus() {
             case .notDetermined, .restricted, .denied:
@@ -68,6 +156,7 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
         }
         determineMyCurrentLocation()
     }
+    
     func determineMyCurrentLocation() {
         locationManager = CLLocationManager()
         locationManager.delegate = self
@@ -78,22 +167,6 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
             locationManager.startUpdatingLocation()
         }
     }
-    
-    @IBAction func nextClick(_ sender: Any) {
-        if let tipText = tipNameTxt.text, !tipText.isEmpty, let hotelName = hotelNametxt.text, !hotelName.isEmpty, let startDate = startDatetxt.text, !startDate.isEmpty, let endDate = endDatetxt.text, !endDate.isEmpty {
-            self.view.endEditing(true)
-            UIView.transition(with: view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
-                self?.tipNameView.isHidden = true
-                self?.courseView.isHidden = false
-                self?.addExpenseView.isHidden = true
-                self?.segmentView.selectedSegmentIndex = 1
-            })
-        } else {
-            UIAlertController.show(self, "Error", "All Fields are mandatory")
-        }
-    }
-
-    //MARK: - Location Manager
     func locationManager(_ manager: CLLocationManager,didUpdateLocations locations: [CLLocation]) {
         let location = manager.location?.coordinate
         userCurrentLat = (location?.latitude) ?? 0.0
@@ -202,6 +275,11 @@ extension PlanTripViewController: GMSAutocompleteViewControllerDelegate {
         if(distanceInMeters <= 80467.2) {
             // under 1 mile
             print("In 50 miles")
+            if let contactNo = place.phoneNumber {
+                hotelPhoneNumber = contactNo
+            }
+            hotelID = place.placeID
+            hotelName = place.name
             hotelNametxt.text = place.formattedAddress
         } else {
              print("out of 50 miles")
@@ -230,24 +308,46 @@ extension PlanTripViewController : UITableViewDelegate,UITableViewDataSource
 {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
-        return 1
+        return courseArr.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "coursecell") {
-            cell.textLabel?.text = "iOS Swift"
+            cell.textLabel?.text = courseArr[indexPath.row].courseName
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.lineBreakMode = .byWordWrapping
             return cell
         }
         return UITableViewCell()
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
-    {
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        UIView.transition(with: view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
-            self?.tipNameView.isHidden = true
-            self?.courseView.isHidden = true
-            self?.addExpenseView.isHidden = false
-            self?.segmentView.selectedSegmentIndex = 2
-        })
+            let courseId = courseArr[indexPath.row].courseId
+            let tripID = self.currentTripId
+            ActivityIndicator.shared.show(self.view)
+            let dic = ["trip_id": tripID, "course_id": courseId]
+            print("Dict: \n\(dic)")
+            DataManager.postAPIWithParameters(urlString: API.addCourse , jsonString: dic as [String : AnyObject], success: {
+                success in
+                ActivityIndicator.shared.hide()
+                self.moveToExpense()
+            }, failure: {
+                failure in
+                ActivityIndicator.shared.hide()
+                self.moveToExpense()
+                print(failure)
+            })
+    }
+
+    func moveToExpense() {
+        DispatchQueue.main.async {
+            UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
+                self?.tipNameView.isHidden = true
+                self?.courseView.isHidden = true
+                self?.addExpenseView.isHidden = false
+                self?.segmentView.selectedSegmentIndex = 2
+            })
+        }
     }
 }

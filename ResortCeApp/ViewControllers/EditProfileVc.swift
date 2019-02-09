@@ -145,32 +145,30 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
         DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
             sucess in
             ActivityIndicator.shared.hide()
-            let user_dict = sucess.value(forKey: "body") as! [String:Any]
-            print(user_dict)
-            self.TxtEmail.text = (user_dict["email"] as! String)
-            self.TxtUserName.text = (user_dict["firstname"] as! String)
-            self.TxtMobileNo.text = (user_dict["phone"] as! String)
-            self.TxtAddress.text = (user_dict["address"] as! String)
-            self.TxtProfession.text = (user_dict["Profession_name"] as! String)
-            self.TxtLastNAme.text =  (user_dict["lastname"] as! String)
-            
-            self.TxtSecondProfession.text = (user_dict["secondary_profession"] as! String)
-            self.TxtSpecialInSecond.text = (user_dict["secondary_profession_subspecialty"] as! String)
-            self.TxtRenewalcycle.text = (user_dict["renewal_cycle"] as! String)
-            self.TxtSpecialIn.text = (user_dict["profession_subspecialty"] as! String)
-            self.TxtNextREnewalData.text = (user_dict["next_renewal_date"] as! String)
-            self.TxtStateOflicensure.text = (user_dict["license"] as! String)
-            self.TxtLicenseNumber.text = (user_dict["license_number"] as! String)
-            if UserDefaults.standard.value(forKey: "dob") == nil
-           {
-            self.TxtDOB.text = ""
-           }
-            else
-           {
-            self.TxtDOB.text = (UserDefaults.standard.value(forKey: "dob")  as! String)
+            if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
+                self.TxtEmail.text = (userObj["email"] as? String)
+                self.TxtUserName.text = (userObj["firstname"] as? String)
+                self.TxtMobileNo.text = (userObj["phone"] as? String)
+                self.TxtAddress.text = (userObj["address"] as? String)
+                self.TxtProfession.text = (userObj["Profession_name"] as? String)
+                self.TxtLastNAme.text =  (userObj["lastname"] as? String)
+                
+                self.TxtSecondProfession.text = (userObj["secondary_profession"] as? String)
+                self.TxtSpecialInSecond.text = (userObj["secondary_profession_subspecialty"] as? String)
+                self.TxtRenewalcycle.text = (userObj["renewal_cycle"] as? String)
+                self.TxtSpecialIn.text = (userObj["profession_subspecialty"] as? String)
+                self.TxtNextREnewalData.text = (userObj["next_renewal_date"] as? String)
+                self.TxtStateOflicensure.text = (userObj["license"] as? String)
+                self.TxtLicenseNumber.text = (userObj["license_number"] as? String)
+                
+                if UserDefaults.standard.value(forKey: "dob") == nil {
+                    self.TxtDOB.text = ""
+                } else {
+                    self.TxtDOB.text = (UserDefaults.standard.value(forKey: "dob")  as! String)
+                }
+                let photo = userObj["image"] as? String
+                self.UserImage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage:#imageLiteral(resourceName: "DefaultImage"))
             }
-            let photo = user_dict["image"] as? String
-            self.UserImage.sd_setImage(with: URL(string: photo!), placeholderImage:#imageLiteral(resourceName: "DefaultImage"))
             
         }, failure: {
             fail in

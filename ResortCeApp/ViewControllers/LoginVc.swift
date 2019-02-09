@@ -17,17 +17,25 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
     @IBOutlet weak var loginIdTxt: UITextField!
     @IBOutlet weak var passwordTxtField: UITextField!
     var DeviceToken = ""
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
-         NotificationCenter.default.addObserver(self, selector: #selector(self.loadviewfornotifications), name: NSNotification.Name(rawValue: "styleUser1"), object: nil)
-       
+       configure()
+    }
+    
+    func configure() {
+        if let deviceToken = UserDefaults.standard.value(forKey: "DeviceToken") as? String  {
+            self.DeviceToken = deviceToken
+        } else {
+            self.DeviceToken = ""
+        }
+        NotificationCenter.default.addObserver(self, selector: #selector(self.loadviewfornotifications), name: NSNotification.Name(rawValue: "styleUser1"), object: nil)
+        loginIdTxt.setLeftPaddingPoints(10)
+        passwordTxtField.setLeftPaddingPoints(10)
         GIDSignIn.sharedInstance().delegate = self
         GIDSignIn.sharedInstance().uiDelegate = self
-        
-        // Do any additional setup after loading the view, typically from a nib.
     }
+    
     @objc func loadviewfornotifications(_ notification: Notification)
     {
         let ve = storyboard?.instantiateViewController(withIdentifier: "NotificationVc") as? NotificationVc
@@ -66,15 +74,6 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
     let familyName = user.profile.familyName
     let email = user.profile.email
     // ...
-        if let deviceToken = UserDefaults.standard.value(forKey: "DeviceToken") as? String
-        {
-            self.DeviceToken = deviceToken
-            
-        }
-        else
-        {
-            self.DeviceToken = ""
-        }
         let dic = ["social_id": userId ,"social_type" : "2","email":email ,"firstname":fname, "lastname" : lname ,"device_type":"1","device_token":DeviceToken]
         DataManager.postAPIWithParameters(urlString: API.socialLogin , jsonString: dic as [String : AnyObject], success: {
             success in
@@ -154,18 +153,6 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
                     let dict = result as! [String : AnyObject]
                     print(dict)
                    
-                    
-                    
-                    if let deviceToken = UserDefaults.standard.value(forKey: "DeviceToken") as? String
-                    {
-                        self.DeviceToken = deviceToken
-                        
-                    }
-                    else
-                    {
-                         self.DeviceToken = ""
-                    }
-                    
                     if dict["id"] != nil{
                         let id = dict["id"] as? String
                         let email = dict["email"] as? String
@@ -221,33 +208,59 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
 
 extension LoginVc {
     @IBAction func LoginAction(_ sender: Any) {
-        let dic = ["email":loginIdTxt.text ,"password":passwordTxtField.text]
-         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        DataManager.postAPIWithParameters(urlString: API.socialLogin , jsonString: dic as [String : AnyObject], success: {
-            success in
-            print(success)
-             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-//            let dict_sucess = success.value(forKey: "body") as! [String :Any]
-//            let auth_key =  dict_sucess["authorization_key"] as! String
-//            UserDefaults.standard.set(auth_key, forKey: "auth_key")
-//            print(dict_sucess)
-//            print(auth_key)
-////            if let deviceToken = UserDefaults.standard.value(forKey: "DeviceToken") as? String
-////            {
-////                self.DeviceToken = deviceToken
-////
-////            }
-//            UserDefaults.standard.setValue(auth_key, forKey: "authKey")
-//            UserDefaults.standard.set("1", forKey: AppKey.LoginStatus )
-//            User.iswhichUser = "1"
-//            UserDefaults.standard.set("1", forKey: "First")
-//
-//            let vc = self.storyboard?.instantiateViewController(withIdentifier: "HomeVc") as? HomeVc
-//            self.navigationController?.pushViewController(vc!, animated: true)
-        }, failure: {
-            failure in
-             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print(failure)
-        })
+        if let loginTxt = loginIdTxt.text, loginTxt.isEmptyOrWhitespace() {
+            UIAlertController.show(self, "Error", "Email is mandatory")
+            return
+        } else if let passwordTxtField = passwordTxtField.text, passwordTxtField.isEmptyOrWhitespace() {
+            UIAlertController.show(self, "Error", "Password is incorrect")
+            return
+        } else if let loginTxt = loginIdTxt.text, !isValidEmail(testStr: loginTxt) {
+            UIAlertController.show(self, "Error", "Invalid Email Id.")
+            return
+        } else {
+            self.view.endEditing(true)
+            ActivityIndicator.shared.show(self.view)
+            let dic = ["email":loginIdTxt.text ,"password":passwordTxtField.text]
+            DataManager.postAPIWithParameters(urlString: API.logIn , jsonString: dic as [String : AnyObject], success: {
+                success in
+                print(success)
+                if let responseArr = success as? [Dictionary<String, AnyObject>], responseArr.count > 0, let response = responseArr.first {
+                    print(response)
+                    ActivityIndicator.shared.hide()
+                    // Authorisation User
+                    if let auth_Token = response["auth"] as? Bool, auth_Token {
+                        if let Token = response["token"] as? Int, let userId = response["uid"] as? String  {
+                            let myToken = String(Token)
+                            UserDefaults.standard.set(myToken, forKey: "authKey")
+                            UserDefaults.standard.set(userId, forKey: "userid")
+                            UserDefaults.standard.set("1", forKey: AppKey.LoginStatus )
+                            User.iswhichUser = "1"
+                            UserDefaults.standard.set("1", forKey: "First")
+                            UserDefaults.standard.synchronize()
+                            let vc = self.storyboard?.instantiateViewController(withIdentifier: "HomeVc") as? HomeVc
+                            self.navigationController?.pushViewController(vc!, animated: true)
+                        }
+                    } else {
+                        let alert = UIAlertController(title: "Error", message: "Invalid Authorization", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler:nil))
+                        self.present(alert, animated: true, completion: {[weak self] in
+                            self?.loginIdTxt.text = ""
+                            self?.passwordTxtField.text = ""
+                        })
+                        return
+                    }
+                }
+            }, failure: {
+                failure in
+                ActivityIndicator.shared.hide()
+                print(failure)
+            })
+        }
+       
+    }
+    
+    @IBAction func signUpAction(_ sender: Any) {
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "signupvc") as? SignUpVC
+        self.navigationController?.pushViewController(vc!, animated: true)
     }
 }

@@ -11,7 +11,9 @@
 		22200A0121EB0C80006DA5B8 /* TripTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0021EB0C80006DA5B8 /* TripTrackerViewController.swift */; };
 		22200A0321EB12B9006DA5B8 /* TripTrackCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0221EB12B9006DA5B8 /* TripTrackCell.swift */; };
 		22200A0521EB2B3D006DA5B8 /* ResortceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0421EB2B3D006DA5B8 /* ResortceViewController.swift */; };
+		2240B3892205997600AA8FC5 /* SignUpVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2240B3882205997600AA8FC5 /* SignUpVC.swift */; };
 		227B838121E9F4AF0097AB32 /* PlanTripViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227B838021E9F4AF0097AB32 /* PlanTripViewController.swift */; };
+		22A82A2C2208A60F0088158E /* Trip+CourseObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A82A2B2208A60E0088158E /* Trip+CourseObj.swift */; };
 		4301875220AAC0C70035C5AB /* ReportVc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4301875120AAC0C70035C5AB /* ReportVc.swift */; };
 		430A68752121865C00F42136 /* EditTrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430A68742121865C00F42136 /* EditTrip.swift */; };
 		430AE86820BD279400809386 /* TripReportVc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430AE86720BD279400809386 /* TripReportVc.swift */; };
@@ -83,7 +85,9 @@
 		22200A0021EB0C80006DA5B8 /* TripTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTrackerViewController.swift; sourceTree = "<group>"; };
 		22200A0221EB12B9006DA5B8 /* TripTrackCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTrackCell.swift; sourceTree = "<group>"; };
 		22200A0421EB2B3D006DA5B8 /* ResortceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResortceViewController.swift; sourceTree = "<group>"; };
+		2240B3882205997600AA8FC5 /* SignUpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpVC.swift; sourceTree = "<group>"; };
 		227B838021E9F4AF0097AB32 /* PlanTripViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanTripViewController.swift; sourceTree = "<group>"; };
+		22A82A2B2208A60E0088158E /* Trip+CourseObj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trip+CourseObj.swift"; sourceTree = "<group>"; };
 		2AE8F99EDB720141A34D2E15 /* Pods-ResortCeApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ResortCeApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-ResortCeApp/Pods-ResortCeApp.release.xcconfig"; sourceTree = "<group>"; };
 		4301875120AAC0C70035C5AB /* ReportVc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportVc.swift; sourceTree = "<group>"; };
 		430A68742121865C00F42136 /* EditTrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTrip.swift; sourceTree = "<group>"; };
@@ -306,6 +310,8 @@
 				22200A0021EB0C80006DA5B8 /* TripTrackerViewController.swift */,
 				22200A0221EB12B9006DA5B8 /* TripTrackCell.swift */,
 				22200A0421EB2B3D006DA5B8 /* ResortceViewController.swift */,
+				2240B3882205997600AA8FC5 /* SignUpVC.swift */,
+				22A82A2B2208A60E0088158E /* Trip+CourseObj.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -545,9 +551,11 @@
 				436B6FF820AAEFC300675DFE /* placeholder 2.swift in Sources */,
 				43BFF594204E6D46006AF673 /* LectReviewVc.swift in Sources */,
 				43F34939215287BB0080D949 /* PDFViewVC.swift in Sources */,
+				22A82A2C2208A60F0088158E /* Trip+CourseObj.swift in Sources */,
 				22200A0121EB0C80006DA5B8 /* TripTrackerViewController.swift in Sources */,
 				439724B8203196290055D4B6 /* AppDelegate.swift in Sources */,
 				43DA28D020AAFD2A008F62D1 /* Extensions.swift in Sources */,
+				2240B3892205997600AA8FC5 /* SignUpVC.swift in Sources */,
 				438B98A320A1C74C00858C89 /* thirdVc.swift in Sources */,
 				437F47D42033048D002238F8 /* EditProfileVc.swift in Sources */,
 				437F47D620331F5D002238F8 /* Lect1Detail.swift in Sources */,

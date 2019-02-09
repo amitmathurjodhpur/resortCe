@@ -25,7 +25,7 @@ class DataManager {
                         if let value = response.result.value {
                             success(value as AnyObject)
                         }
-                    }else if (response.response?.statusCode == 203)
+                    } else if (response.response?.statusCode == 203)
                     {
                         UserDefaults.standard.set("0", forKey: "auth_key")
                         UserDefaults.standard.set("0", forKey: AppKey.LoginStatus)

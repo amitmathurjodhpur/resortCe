@@ -43,41 +43,27 @@ class ProfileVc: UIViewController {
             sucess in
             ActivityIndicator.shared.hide()
             print(sucess)
-            let user_dict = sucess.value(forKey: "body") as! [String:Any]
-            let fname = user_dict["firstname"]as! String
-            let lname = user_dict["lastname"]as! String
-            self.UserName.text = fname + " "  + lname
-            self.UserEmail.text = user_dict["email"] as? String
-            self.TxtAddress.text = user_dict["address"] as? String
-            self.TxtMobile.text = (user_dict["phone"] as! String)
-            self.TxtProfession.text = (user_dict["Profession_name"] as! String)
-            
-             self.TxtSecondProfession.text = (user_dict["secondary_profession"] as! String)
-            
-             self.TxtRenewalcycle.text = (user_dict["renewal_cycle"] as! String)
-            self.TxtSpecialInSecond.text = (user_dict["secondary_profession_subspecialty"] as! String)
-            
-             self.TxtSpecialIn.text = (user_dict["profession_subspecialty"] as! String)
-             self.TxtNextREnewalData.text = (user_dict["next_renewal_date"] as! String)
-             self.TxtStateOflicensure.text = (user_dict["license"] as! String)
-             self.TxtLicenseNumber.text = (user_dict["license_number"] as! String)
-            
-//            if UserDefaults.standard.value(forKey: "dob") == nil
-//            {
-//                self.TxtDob.text = ""
-//                
-//            }
-//            else
-//            {
-//                self.TxtDob.text = (UserDefaults.standard.value(forKey: "dob")  as! String)
-//            }
-           
-            
-            let photo = user_dict["image"] as? String
-            self.UserImage.sd_setImage(with: URL(string: photo!), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
-            
-     
-        }, failure: {
+            if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
+                let fname = userObj["firstname"] as? String
+                let lname = userObj["lastname"] as? String
+                self.UserName.text = (fname ?? "") + " " + (lname ?? "")
+                self.UserEmail.text = userObj["email"] as? String
+                let photo = userObj["image"] as? String
+                self.UserImage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
+                self.TxtAddress.text = userObj["address"] as? String
+                self.TxtMobile.text = (userObj["phone"] as? String)
+                self.TxtProfession.text = (userObj["Profession_name"] as? String)
+                self.TxtSecondProfession.text = (userObj["secondary_profession"] as? String)
+                
+                self.TxtRenewalcycle.text = (userObj["renewal_cycle"] as? String)
+                self.TxtSpecialInSecond.text = (userObj["secondary_profession_subspecialty"] as? String)
+                
+                self.TxtSpecialIn.text = (userObj["profession_subspecialty"] as? String)
+                self.TxtNextREnewalData.text = (userObj["next_renewal_date"] as? String)
+                self.TxtStateOflicensure.text = (userObj["license"] as? String)
+                self.TxtLicenseNumber.text = (userObj["license_number"] as? String)
+            }
+          }, failure: {
             fail in
             ActivityIndicator.shared.hide()
         })

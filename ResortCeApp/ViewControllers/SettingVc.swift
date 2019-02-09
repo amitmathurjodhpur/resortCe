@@ -52,14 +52,14 @@ class SettingVc: UIViewController,SFSafariViewControllerDelegate {
             sucess in
             ActivityIndicator.shared.hide()
             print(sucess)
-            let user_dict = sucess.value(forKey: "body") as! [String:Any]
-            let fname = user_dict["firstname"]as! String
-            let lname = user_dict["lastname"]as! String
-            self.UserName.text = fname + lname
-            self.UserEmail.text = user_dict["email"] as? String
-            let photo = user_dict["image"] as? String
-            self.UserImage.sd_setImage(with: URL(string: photo!), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
-            
+            if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
+                let fname = userObj["firstname"] as? String
+                let lname = userObj["lastname"] as? String
+                self.UserName.text = (fname ?? "") + " " + (lname ?? "")
+                self.UserEmail.text = userObj["email"] as? String
+                let photo = userObj["image"] as? String
+                self.UserImage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
+            }
         }, failure: {
             fail in
             ActivityIndicator.shared.hide()

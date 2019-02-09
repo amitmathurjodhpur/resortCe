@@ -13,9 +13,9 @@ import UIKit
 extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     @IBAction func receiptAction(_ sender: Any) {
-        let pickerView = UIImagePickerController()
-        pickerView.delegate = self
-        pickerView.sourceType = .photoLibrary
+       
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary
         let alert:UIAlertController=UIAlertController(title: "Choose Image", message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
         let cameraAction = UIAlertAction(title: "Camera", style: UIAlertActionStyle.default) {
             UIAlertAction in
@@ -35,20 +35,77 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
         alert.addAction(cancelAction)
         self.present(alert, animated: true, completion: nil)
     }
-    
+  
     @IBAction func saveAction(_ sender: Any) {
-        self.navigationController?.popViewController(animated: true)
+        //self.navigationController?.popViewController(animated: true)
+       self.postExpense(type: "1")
     }
     
     @IBAction func addNewAction(_ sender: Any) {
+        self.postExpense(type: "3")
     }
     
     @IBAction func skipAction(_ sender: Any) {
-         self.navigationController?.popViewController(animated: true)
+        self.postExpense(type: "2")
+    }
+    
+    func postExpense(type: String) {
+        if let nameText = expenseName.text, !nameText.isEmpty, let startDate = expenseDate.text, !startDate.isEmpty, let expType = expenseTypeTxt.text, !expType.isEmpty, let expAmount = expenseAmountTxt.text, !expAmount.isEmpty {
+            self.view.endEditing(true)
+            ActivityIndicator.shared.show(self.view)
+            let dic = ["trip_id": currentTripId ,"expensis_name": nameText, "expensis_date": startDate, "expensis_type": expType, "expensis_amount":expAmount]
+            if let currImage = currentImage, let imageData = UIImageJPEGRepresentation(currImage, 0.5) as NSData? {
+                DataManager.postMultipartDataWithParameters(urlString: API.addTripExpenses, imageData: ["expensis_image": imageData] as [String : Data], params: dic as [String : AnyObject], success: {
+                    success in
+                    ActivityIndicator.shared.hide()
+                    if type == "1" || type == "2" {
+                        self.moveToTrips()
+                    } else if type == "3" {
+                        self.expenseName.text = ""
+                        self.expenseTypeTxt.text = ""
+                        self.expenseAmountTxt.text = ""
+                        self.expenseDate.text = ""
+                        self.currentImage = nil
+                    }
+                    /*let viewControllers: [UIViewController] = self.navigationController!.viewControllers
+                    for aViewController in viewControllers {
+                        if aViewController is LockerVc {
+                            self.navigationController!.popToViewController(aViewController, animated: true)
+                        }
+                    }*/
+                   
+                }, failure: {
+                    fail in
+                    ActivityIndicator.shared.hide()
+                })
+            } else {
+                print("Dict: \n\(dic)")
+                DataManager.postAPIWithParameters(urlString: API.addTripExpenses , jsonString: dic as [String : AnyObject], success: {
+                    success in
+                    print(success)
+                    ActivityIndicator.shared.hide()
+                    if type == "1" || type == "2" {
+                        self.moveToTrips()
+                    } else if type == "3" {
+                        self.expenseName.text = ""
+                        self.expenseTypeTxt.text = ""
+                        self.expenseAmountTxt.text = ""
+                        self.expenseDate.text = ""
+                        self.currentImage = nil
+                    }
+                }, failure: {
+                    failure in
+                    ActivityIndicator.shared.hide()
+                    print(failure)
+                })
+            }
+        }
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String: Any]) {
-       // let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            currentImage = image
+        }
         dismiss(animated: true, completion: nil)
     }
     
@@ -64,5 +121,42 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
     func openGallary() {
         imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
         self.present(imagePicker, animated: true, completion: nil)
+    }
+    
+    func moveToCreatetrip() {
+        DispatchQueue.main.async {
+            UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
+                self?.clearAll()
+                self?.tipNameView.isHidden = false
+                self?.courseView.isHidden = true
+                self?.addExpenseView.isHidden = true
+                self?.segmentView.selectedSegmentIndex = 0
+            })
+        }
+    }
+    
+    func moveToTrips() {
+        let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
+        vc?.shouldShowCurrent = true
+        self.navigationController?.pushViewController(vc!, animated: true)
+    }
+   
+    func clearAll() {
+        endDatetxt.text = ""
+        startDatetxt.text = ""
+        hotelNametxt.text = ""
+        tipNameTxt.text = ""
+        expenseName.text = ""
+        expenseTypeTxt.text = ""
+        expenseAmountTxt.text = ""
+        expenseDate.text = ""
+        hotelCurrentLat = 0.0
+        hotelCurrentLong = 0.0
+        hotelPhoneNumber = ""
+        hotelID = ""
+        hotelName = ""
+        currentTripId = ""
+        currentImage = nil
+        courseArr.removeAll()
     }
 }
