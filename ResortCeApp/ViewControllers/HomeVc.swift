@@ -21,7 +21,7 @@ class HomeVc: UIViewController, NewUserDelegate {
    
     override func viewDidLoad() {
         super.viewDidLoad()
-       //userprofile()
+       userprofile()
         self.MenuArray.append("Plan A Trip")
         self.MenuArray.append("Trip Tacker")
         self.MenuArray.append("CE Tracker")
@@ -56,14 +56,14 @@ class HomeVc: UIViewController, NewUserDelegate {
     
     @IBAction func ActnMenuOpen(_ sender: Any)
     {
-        /*let menuVC : HomeMenuVc = self.storyboard!.instantiateViewController(withIdentifier: "HomeMenuVc") as! HomeMenuVc
+        let menuVC : HomeMenuVc = self.storyboard!.instantiateViewController(withIdentifier: "HomeMenuVc") as! HomeMenuVc
         self.view.addSubview(menuVC.view)
         self.addChildViewController(menuVC)
         menuVC.view.layoutIfNeeded()
         menuVC.view.frame=CGRect(x: 0 - UIScreen.main.bounds.size.width, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height);
         UIView.animate(withDuration: 0.3, animations: { () -> Void in
             menuVC.view.frame=CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height);
-        }, completion:nil)*/
+        }, completion:nil)
     }
     
     @IBAction func ActnBack(_ sender: Any)

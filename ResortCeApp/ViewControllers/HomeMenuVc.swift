@@ -24,8 +24,8 @@ class HomeMenuVc: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         Userimage.layer.cornerRadius = Userimage.frame.height/2
-      //  self.PostTotalCredits()
-        //self.PostTotalNotification()
+        //self.getTotalCredits()
+        self.getTotalNotification()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -44,12 +44,12 @@ class HomeMenuVc: UIViewController {
             DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()
-                if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
-                    let fname = userObj["firstname"] as? String
-                    let lname = userObj["lastname"] as? String
+                if let user_dict = sucess.value(forKey: "body") as? [String:Any] /*, let userObj = user_dict["User"] as? [String:Any]*/ {
+                    let fname = user_dict["firstname"] as? String
+                    let lname = user_dict["lastname"] as? String
                     self.username.text = (fname ?? "") + " " + (lname ?? "")
-                    self.userEmail.text = userObj["email"] as? String
-                    let photo = userObj["image"] as? String
+                    self.userEmail.text = user_dict["email"] as? String
+                    let photo = user_dict["image"] as? String
                     self.Userimage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
                 }
                
@@ -60,52 +60,60 @@ class HomeMenuVc: UIViewController {
         }
     }
     
-    func PostTotalCredits()
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.total_credits, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-             let Body = sucess["body"] as! [String:Any]
-            self.TotalCredits = String(Body["total_credit"] as! Int)
-            self.TableVw.reloadData()
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+    func getTotalCredits() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.total_credits, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                if let body = sucess["body"] as? [String:Any], let credit = body["total_credit"] as? Int {
+                    self.TotalCredits = String(credit)
+                    self.TableVw.reloadData()
+                }
+               
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
     }
-    func PostTotalNotification()
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.total_notifications, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            let Body = sucess["body"] as! [String:Any]
-            self.TotalNotifications = String(Body["total_notification"] as! Int)
-            self.TableVw.reloadData()
-            
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+    
+    func getTotalNotification() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.total_notifications, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                if let body = sucess["body"] as? [String:Any], let notification = body["total_notification"] as? Int {
+                    self.TotalNotifications = String(notification)
+                    self.TableVw.reloadData()
+                }
+                
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
     }
+    
     func postLogout() {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.logout, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            UserDefaults.standard.set("0", forKey: "auth_key")
-            UserDefaults.standard.set("0", forKey: AppKey.LoginStatus)
-            User.iswhichUser = "0"
-            let vc =  self.storyboard?.instantiateViewController(withIdentifier: "LoginVc") as! LoginVc
-            let navigationController = UINavigationController(rootViewController: vc)
-            navigationController.isNavigationBarHidden = true
-            UIApplication.shared.keyWindow?.rootViewController = navigationController
-            
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.logout, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                UserDefaults.standard.set("0", forKey: "auth_key")
+                UserDefaults.standard.set("0", forKey: AppKey.LoginStatus)
+                User.iswhichUser = "0"
+                let vc =  self.storyboard?.instantiateViewController(withIdentifier: "LoginVc") as! LoginVc
+                let navigationController = UINavigationController(rootViewController: vc)
+                navigationController.isNavigationBarHidden = true
+                UIApplication.shared.keyWindow?.rootViewController = navigationController
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
     }
     @IBAction func ActnCrossBtn(_ sender: Any)
     {

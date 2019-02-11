@@ -57,11 +57,10 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
         TxtAddress.delegate = self
         imagePicker.delegate = self
         UserImage.layer.cornerRadius = UserImage.frame.height/2
-        self.postUserProfile()
-        self.postProfessionListing()
+        self.getUserProfile()
+        self.getProfessionListing()
         TxtDOB.isHidden = true
-        
-            RenewalCyleArray = ["Annually","Every 2 years","Every 3 years"]
+        RenewalCyleArray = ["Annually","Every 2 years","Every 3 years"]
     }
     func searchBarBtnPressed(_ sender: Any) {
         let autocompleteController = GMSAutocompleteViewController()
@@ -140,33 +139,33 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
         self.view.endEditing(true)
        
     }
-    func postUserProfile() {
+    func getUserProfile() {
         ActivityIndicator.shared.show(self.view)
         DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
             sucess in
             ActivityIndicator.shared.hide()
-            if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
-                self.TxtEmail.text = (userObj["email"] as? String)
-                self.TxtUserName.text = (userObj["firstname"] as? String)
-                self.TxtMobileNo.text = (userObj["phone"] as? String)
-                self.TxtAddress.text = (userObj["address"] as? String)
-                self.TxtProfession.text = (userObj["Profession_name"] as? String)
-                self.TxtLastNAme.text =  (userObj["lastname"] as? String)
+            if let user_dict = sucess.value(forKey: "body") as? [String:Any] /*, let userObj = user_dict["User"] as? [String:Any]*/ {
+                self.TxtEmail.text = (user_dict["email"] as? String)
+                self.TxtUserName.text = (user_dict["firstname"] as? String)
+                self.TxtMobileNo.text = (user_dict["phone"] as? String)
+                self.TxtAddress.text = (user_dict["address"] as? String)
+                self.TxtProfession.text = (user_dict["Profession_name"] as? String)
+                self.TxtLastNAme.text =  (user_dict["lastname"] as? String)
                 
-                self.TxtSecondProfession.text = (userObj["secondary_profession"] as? String)
-                self.TxtSpecialInSecond.text = (userObj["secondary_profession_subspecialty"] as? String)
-                self.TxtRenewalcycle.text = (userObj["renewal_cycle"] as? String)
-                self.TxtSpecialIn.text = (userObj["profession_subspecialty"] as? String)
-                self.TxtNextREnewalData.text = (userObj["next_renewal_date"] as? String)
-                self.TxtStateOflicensure.text = (userObj["license"] as? String)
-                self.TxtLicenseNumber.text = (userObj["license_number"] as? String)
+                self.TxtSecondProfession.text = (user_dict["secondary_profession"] as? String)
+                self.TxtSpecialInSecond.text = (user_dict["secondary_profession_subspecialty"] as? String)
+                self.TxtRenewalcycle.text = (user_dict["renewal_cycle"] as? String)
+                self.TxtSpecialIn.text = (user_dict["profession_subspecialty"] as? String)
+                self.TxtNextREnewalData.text = (user_dict["next_renewal_date"] as? String)
+                self.TxtStateOflicensure.text = (user_dict["license"] as? String)
+                self.TxtLicenseNumber.text = (user_dict["license_number"] as? String)
                 
                 if UserDefaults.standard.value(forKey: "dob") == nil {
                     self.TxtDOB.text = ""
                 } else {
                     self.TxtDOB.text = (UserDefaults.standard.value(forKey: "dob")  as! String)
                 }
-                let photo = userObj["image"] as? String
+                let photo = user_dict["image"] as? String
                 self.UserImage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage:#imageLiteral(resourceName: "DefaultImage"))
             }
             
@@ -175,42 +174,66 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
             ActivityIndicator.shared.hide()
         })
     }
-    func postProfessionListing()
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.profession_listing, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            self.ProfessionArray  = sucess.value(forKey: "body") as! [[String:Any]]
-            print(self.ProfessionArray)
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
-    }
     
-    func postEditUserProfile()
-    {
-        ActivityIndicator.shared.show(self.view)
-        let data : NSData = UIImageJPEGRepresentation(self.UserImage.image!, 0.5)! as NSData
-        DataManager.postMultipartDataWithParameters(urlString: API.edituserprofiledetails, imageData: ["image": data] as [String : Data], params: Request.editProfile(UserDefaults.standard.value(forKey: "authKey") as! String, self.TxtUserName.text!, self.TxtEmail.text!, self.TxtMobileNo.text!, self.TxtAddress.text!, self.profid , self.TxtLastNAme.text!,String(CurrentLati),String(CurrentLongi),TxtStateOflicensure.text!,self.ProfId2,TxtSpecialIn.text!,TxtSpecialInSecond.text!,TxtLicenseNumber.text!,TxtNextREnewalData.text!,RenewalCyleValueFroAPI) as [String : AnyObject], success:
-            {
+    func getProfessionListing() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            print(authKey)
+            DataManager.postAPIWithParameters(urlString: API.profession_listing, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()
-                let user_dict = sucess.value(forKey: "body") as! [String:Any]
-                print(user_dict)
-               
-             //   UserDefaults.standard.set(self.TxtDOB.text, forKey: "dob")
-                User.iswhichUser = ""
-                self.newUserDelegate?.newUserCompleted()
-                self.navigationController?.popViewController(animated: true)
-                UserDefaults.standard.set("0", forKey: "First")
+                self.ProfessionArray  = sucess.value(forKey: "body") as! [[String:Any]]
+                print(self.ProfessionArray)
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+    }
+    
+    func postEditUserProfile() {
+        if let userImage = self.UserImage.image, let imageData = UIImageJPEGRepresentation(userImage, 0.5) as NSData?, let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postMultipartDataWithParameters(urlString: API.edituserprofiledetails, imageData: ["image": imageData] as [String : Data], params: Request.editProfile(authKey, self.TxtUserName.text ?? "", self.TxtEmail.text ?? "", self.TxtMobileNo.text ?? "", self.TxtAddress.text ?? "", self.profid, self.TxtLastNAme.text ?? "",String(CurrentLati),String(CurrentLongi),TxtStateOflicensure.text ?? "",self.ProfId2,TxtSpecialIn.text ?? "",TxtSpecialInSecond.text ?? "",TxtLicenseNumber.text ?? "",TxtNextREnewalData.text ?? "",RenewalCyleValueFroAPI) as [String : AnyObject], success:
+                {
+                    sucess in
+                    ActivityIndicator.shared.hide()
+                    let user_dict = sucess.value(forKey: "body") as! [String:Any]
+                    print(user_dict)
+                    
+                    //   UserDefaults.standard.set(self.TxtDOB.text, forKey: "dob")
+                    User.iswhichUser = ""
+                    self.newUserDelegate?.newUserCompleted()
+                    self.navigationController?.popViewController(animated: true)
+                    UserDefaults.standard.set("0", forKey: "First")
+                    
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
                 
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-           
-        })
+            })
+        } else if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.edituserprofiledetails, jsonString: Request.editProfile(authKey, self.TxtUserName.text ?? "", self.TxtEmail.text ?? "", self.TxtMobileNo.text ?? "", self.TxtAddress.text ?? "", self.profid, self.TxtLastNAme.text ?? "",String(CurrentLati),String(CurrentLongi),TxtStateOflicensure.text ?? "",self.ProfId2,TxtSpecialIn.text ?? "",TxtSpecialInSecond.text ?? "",TxtLicenseNumber.text ?? "",TxtNextREnewalData.text ?? "",RenewalCyleValueFroAPI) as [String : AnyObject], success: {
+                    sucess in
+                    ActivityIndicator.shared.hide()
+                    let user_dict = sucess.value(forKey: "body") as! [String:Any]
+                    print(user_dict)
+                    
+                    //   UserDefaults.standard.set(self.TxtDOB.text, forKey: "dob")
+                    User.iswhichUser = ""
+                    self.newUserDelegate?.newUserCompleted()
+                    self.navigationController?.popViewController(animated: true)
+                    UserDefaults.standard.set("0", forKey: "First")
+                    
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+                
+            })
+            
+        }
+        
 }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

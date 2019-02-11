@@ -126,9 +126,8 @@ extension FindLocationVc : MKMapViewDelegate,CLLocationManagerDelegate,GMSMapVie
                 NSLog("No place details for \(placeID)")
                 return
             }
-            if (place.types.contains("lodging"))
-            {
-                let dataDictHotel :[String:Any] = ["HotelId":place.placeID,"HotelName":place.name,"HotelAddress":place.formattedAddress ?? "","HotelLatitude": place.coordinate.latitude.description ,"HotelLongitude":place.coordinate.longitude.description  ,"HotelPhone":place.phoneNumber ?? "","HotelWebsite":place.website?.absoluteString ?? ""]
+            if let isContain = place.types?.contains("lodging"), isContain {
+                let dataDictHotel: [String:Any] = ["HotelId":place.placeID ?? "","HotelName":place.name ?? "","HotelAddress":place.formattedAddress ?? "","HotelLatitude": place.coordinate.latitude.description ,"HotelLongitude":place.coordinate.longitude.description  ,"HotelPhone":place.phoneNumber ?? "","HotelWebsite":place.website?.absoluteString ?? ""]
                 print(dataDictHotel)
                 self.addgroups(lati: location.latitude, longi: location.longitude,DataDict: dataDictHotel)
             }

@@ -275,19 +275,24 @@ extension PlanTripViewController: GMSAutocompleteViewControllerDelegate {
         if(distanceInMeters <= 80467.2) {
             // under 1 mile
             print("In 50 miles")
+            hotelNametxt.text = ""
+            UIAlertController.show(self, "Error", "All Trips must be 50 miles from your home.")
+        } else {
+             print("out of 50 miles")
             if let contactNo = place.phoneNumber {
                 hotelPhoneNumber = contactNo
             }
-            hotelID = place.placeID
-            hotelName = place.name
+            if let hotel_ID = place.placeID {
+                hotelID = hotel_ID
+            }
+            
+            if let hotel_name = place.name {
+                hotelName = hotel_name
+            }
             hotelNametxt.text = place.formattedAddress
-        } else {
-             print("out of 50 miles")
-            hotelNametxt.text = ""
-            UIAlertController.show(self, "Error", "All Trips must be 50 miles from your home.")
         }
-
     }
+    
     func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
         // TODO: handle the error.
         print("Error: ", error.localizedDescription)

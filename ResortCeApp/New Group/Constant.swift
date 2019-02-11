@@ -11,6 +11,7 @@ import UIKit
 
 //Base URl for the Application
 //live URL
+
 public let baseURL                  = "http://52.15.160.147/resort-ce/Apis/"
 public let newbaseURL                  = "http://52.15.160.147/resort-ce/apis/"
 public let userProfileURL                  = "http://52.15.160.147/resort-ce/admin/apis/"
@@ -43,7 +44,7 @@ public struct API {
     public static let course_add_to_buy             =   baseURL+"course_add_to_buy"
     public static let course_content_listing    =      baseURL+"course_content_listing"
     public static let logout                       = baseURL+"logout"
-    public static let profession_listing =          baseURL+"profession_listing"
+    public static let profession_listing =          socialLoginURL+"profession_listing"
     public static let getnearbygroups =             baseURL+"get_near_by_groups"
     public static let oneGroupList =                baseURL+"one_group_list"
     public static let subcategory_listing =          baseURL+"subcategory_listing"
@@ -51,7 +52,7 @@ public struct API {
     public static let completedCourse =              baseURL+"completed_course"
     public static let LockerCourseListing =         baseURL+"locker_course_listing"
     public static let total_credits =         baseURL+"total_credits"
-    public static let total_notifications =         baseURL+"total_notifications"
+    public static let total_notifications =         socialLoginURL+"total_notifications"
     public static let Notifications =         baseURL+"notifications"
     public static let AddTrip       =         baseURL+"add_trip"
     public static let TripListing       =      baseURL+"my_trip_listing"
