@@ -14,8 +14,10 @@ class CellMenu: UITableViewCell
 }
 class HomeMenuVc: UIViewController {
     @IBOutlet weak var TableVw: UITableView!
-    var MenuArray : [String] = ["Home","Settings","My Account","My lectures","Notification","My Pdf","Log Out"]
-    var imageArray : [UIImage] = [#imageLiteral(resourceName: "home"),#imageLiteral(resourceName: "setting"),#imageLiteral(resourceName: "MyAccount"),#imageLiteral(resourceName: "mylect"),#imageLiteral(resourceName: "NotificationBell"),#imageLiteral(resourceName: "edit"),#imageLiteral(resourceName: "Logout")]
+//    var MenuArray : [String] = ["Home","Settings","My Account","My lectures","Notification","My Pdf","Log Out"]
+//    var imageArray : [UIImage] = [#imageLiteral(resourceName: "home"),#imageLiteral(resourceName: "setting"),#imageLiteral(resourceName: "MyAccount"),#imageLiteral(resourceName: "mylect"),#imageLiteral(resourceName: "NotificationBell"),#imageLiteral(resourceName: "edit"),#imageLiteral(resourceName: "Logout")]
+    var MenuArray : [String] = ["Home","Settings","My Account","Notification","My Pdf","Log Out"]
+    var imageArray : [UIImage] = [#imageLiteral(resourceName: "home"),#imageLiteral(resourceName: "setting"),#imageLiteral(resourceName: "MyAccount"),#imageLiteral(resourceName: "NotificationBell"),#imageLiteral(resourceName: "edit"),#imageLiteral(resourceName: "Logout")]
     @IBOutlet weak var Userimage: UIImageView!
     var TotalCredits = ""
     var TotalNotifications = ""
@@ -153,44 +155,29 @@ extension HomeMenuVc : UITableViewDelegate,UITableViewDataSource
         return cell!
         }
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
-    {
-        if indexPath.row == 0
-        {
-
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row == 0 {
             let vc =  self.storyboard?.instantiateViewController(withIdentifier: "HomeVc") as! HomeVc
             let navigationController = UINavigationController(rootViewController: vc)
             navigationController.isNavigationBarHidden = true
             UIApplication.shared.keyWindow?.rootViewController = navigationController
-        }
-        if indexPath.row == 1
-        {
+        } else if indexPath.row == 1 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "SettingVc") as? SettingVc
             self.navigationController?.pushViewController(vc!, animated: true)
-        }
-        if indexPath.row == 2
-        {
+        } else if indexPath.row == 2 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "ProfileVc") as? ProfileVc
             self.navigationController?.pushViewController(vc!, animated: true)
-        }
-        if indexPath.row == 3
-        {
+        } /* else if indexPath.row == 3 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "MyLecturesVc") as? MyLecturesVc
             self.navigationController?.pushViewController(vc!, animated: true)
-        }
-        
-        if indexPath.row == 4
-        {
+        }*/ else if indexPath.row == 3 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "NotificationVc") as? NotificationVc
             self.navigationController?.pushViewController(vc!, animated: true)
-        }
-        if indexPath.row == 5
-        {
+        } else if indexPath.row == 4 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "DocumentsVC") as? DocumentsVC
             self.navigationController?.pushViewController(vc!, animated: true)
-        }
-        if indexPath.row == 6
-        {
+        } else if indexPath.row == 5 {
             UserDefaults.standard.set("0", forKey: "auth_key")
             UserDefaults.standard.set("0", forKey: AppKey.LoginStatus)
             User.iswhichUser = "0"

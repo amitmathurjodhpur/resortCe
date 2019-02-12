@@ -54,7 +54,10 @@ class ResortceViewController: UIViewController, UITableViewDelegate, UITableView
             let vc = storyboard?.instantiateViewController(withIdentifier: "FindLocationVc") as? FindLocationVc
             self.navigationController?.pushViewController(vc!, animated: true)
         } else  if indexPath.row == 2 {
-            let vc = storyboard?.instantiateViewController(withIdentifier: "LecturesInProgressVc") as? LecturesInProgressVc
+           /* let vc = storyboard?.instantiateViewController(withIdentifier: "LecturesInProgressVc") as? LecturesInProgressVc
+            self.navigationController?.pushViewController(vc!, animated: true)*/
+            let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
+            vc?.shouldShowCurrent = false
             self.navigationController?.pushViewController(vc!, animated: true)
         }
     }

@@ -40,7 +40,7 @@ public struct API {
     public static let course_add_to_favourite   =      baseURL+"course_add_to_favourite"
     public static let my_course_listing         =         baseURL+"my_course_listing"
     public static let course_in_progress_listing = baseURL+"course_in_progress_listing"
-    public static let edituserprofiledetails   = baseURL+"edit_user_profile_details"
+    public static let edituserprofiledetails   = socialLoginURL+"edit_user_profile_details"
     public static let course_add_to_buy             =   baseURL+"course_add_to_buy"
     public static let course_content_listing    =      baseURL+"course_content_listing"
     public static let logout                       = baseURL+"logout"

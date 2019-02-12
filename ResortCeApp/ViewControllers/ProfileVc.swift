@@ -37,13 +37,15 @@ class ProfileVc: UIViewController {
         super.viewWillAppear(animated)
         self.postUserProfile()
     }
+    
     func postUserProfile() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
         ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
+        DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
             sucess in
             ActivityIndicator.shared.hide()
             print(sucess)
-            if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
+            if let userObj = sucess.value(forKey: "body") as? [String:Any] /*, let userObj = user_dict["User"] as? [String:Any]*/ {
                 let fname = userObj["firstname"] as? String
                 let lname = userObj["lastname"] as? String
                 self.UserName.text = (fname ?? "") + " " + (lname ?? "")
@@ -63,12 +65,12 @@ class ProfileVc: UIViewController {
                 self.TxtStateOflicensure.text = (userObj["license"] as? String)
                 self.TxtLicenseNumber.text = (userObj["license_number"] as? String)
             }
-          }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
-        
-    }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+   }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

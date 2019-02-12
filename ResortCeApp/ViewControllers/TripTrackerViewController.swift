@@ -28,22 +28,24 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
         tableView.rowHeight = UITableViewAutomaticDimension
         if shouldShowCurrent {
              self.title = "Trip Tracker"
-            sectionNames = [ "Current Trips","In Progress Trips", "Completed Trips"]
             getTripList()
         } else {
              self.title = "CE Tracker"
-            sectionNames = [ "In Progress Courses", "Completed Courses"]
             getCourseList()
         }
        
         self.tableView!.tableFooterView = UIView()
     }
    
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden  = false
+    }
+    
     func getTripList() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
-            // let dic = ["user_id": userId]
-            let dic = ["user_id": "184"]
+             let dic = ["user_id": userId]
+           // let dic = ["user_id": "184"]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getTrips , jsonString: dic as [String : AnyObject], success: {
                 success in
@@ -51,6 +53,7 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                 ActivityIndicator.shared.hide()
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
                     print(response.count)
+                    self.sectionNames = [ "Current Trips","In Progress Trips", "Completed Trips"]
                     for tripObj in response {
                         if let trip = tripObj as Dictionary<String, AnyObject>?, let tripId = trip["id"] as? String, let tripName = trip["name"] as? String, let status = trip["status"] as? String, let tDate = trip["date"] as? String {
                             let trip = Trip.init(tripeId: tripId, tripName: tripName, status: status, tripDate: tDate)
@@ -67,7 +70,7 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                         self.tableView.reloadData()
                     }
                 } else {
-                    UIAlertController.show(self, "ResortCe", "No Results Found")
+                    //UIAlertController.show(self, "ResortCe", "No Results Found")
                 }
             }, failure: {
                 failure in
@@ -81,14 +84,15 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     func getCourseList() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
-            // let dic = ["user_id": userId]
-            let dic = ["user_id": "184"]
+             let dic = ["user_id": userId]
+            //let dic = ["user_id": "184"]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getCourses , jsonString: dic as [String : AnyObject], success: {
                 success in
                 print(success)
                 ActivityIndicator.shared.hide()
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
+                    self.sectionNames = [ "In Progress Courses", "Completed Courses"]
                     for courseObj in response {
                         if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String {
                             let course = Course.init(courseId: courseId, courseName: courseName, status: status)
@@ -103,7 +107,7 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                         self.tableView.reloadData()
                     }
                 } else {
-                    UIAlertController.show(self, "ResortCe", "No Results Found")
+                    //UIAlertController.show(self, "ResortCe", "No Results Found")
                 }
             }, failure: {
                 failure in
@@ -119,7 +123,8 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
             return sectionNames.count
         } else {
             let messageLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.bounds.size.width, height: view.bounds.size.height))
-            messageLabel.text = "Retrieving data.\nPlease wait."
+            //messageLabel.text = "Retrieving data.\nPlease wait."
+            messageLabel.text = "No Results Found"
             messageLabel.numberOfLines = 0
             messageLabel.textAlignment = .center
             messageLabel.font = UIFont(name: "HelveticaNeue", size: 20.0)!

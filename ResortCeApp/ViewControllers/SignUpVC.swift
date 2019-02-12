@@ -30,9 +30,6 @@ class SignUpVC: UIViewController,UIImagePickerControllerDelegate,UINavigationCon
     }
     
     func configureView() {
-        //0.45 * cancelAction.bounds.size.width //
-        cancelAction.layer.cornerRadius = 0.5 * cancelAction.bounds.size.width //min(cancelAction.frame.size.height, cancelAction.frame.size.width) / 2.0
-        cancelAction.clipsToBounds = true
         imagePicker.delegate = self
         mobileTxt.delegate = self
         emailTxt.delegate = self

@@ -11,7 +11,8 @@ import SafariServices
 import Social
 import FBSDKShareKit
 import FacebookShare
-
+import FacebookCore
+import FBSDKLoginKit
 
 
 class CellSetting: UITableViewCell
@@ -44,36 +45,103 @@ class SettingVc: UIViewController,SFSafariViewControllerDelegate {
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        
-    }
-    func postUserProfile() {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            print(sucess)
-            if let user_dict = sucess.value(forKey: "body") as? [String:Any], let userObj = user_dict["User"] as? [String:Any] {
-                let fname = userObj["firstname"] as? String
-                let lname = userObj["lastname"] as? String
-                self.UserName.text = (fname ?? "") + " " + (lname ?? "")
-                self.UserEmail.text = userObj["email"] as? String
-                let photo = userObj["image"] as? String
-                self.UserImage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
-            }
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
-        
     }
     
-     func BtnShareOnFB()
-    {
-        // import SafariServices   and  Use (SFSafariViewControllerDelegate)
-        let vc = SLComposeViewController(forServiceType:SLServiceTypeFacebook)
-        vc?.add(URL(string: "http:www.ResortCe.com"))
-        vc?.setInitialText("ResortCe")
-        self.present(vc!, animated: true, completion: nil)
+    func postUserProfile() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.userProfileDetail, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                print(sucess)
+                if let userObj = sucess.value(forKey: "body") as? [String:Any] /*, let userObj = user_dict["User"] as? [String:Any]*/ {
+                    let fname = userObj["firstname"] as? String
+                    let lname = userObj["lastname"] as? String
+                    self.UserName.text = (fname ?? "") + " " + (lname ?? "")
+                    self.UserEmail.text = userObj["email"] as? String
+                    let photo = userObj["image"] as? String
+                    self.UserImage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage: #imageLiteral(resourceName: "DefaultImage"))
+                }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+    }
+    
+     func BtnShareOnFB() {
+        
+//        // import SafariServices   and  Use (SFSafariViewControllerDelegate)
+//        let vc = SLComposeViewController(forServiceType:SLServiceTypeFacebook)
+//        vc?.add(URL(string: "http:www.ResortCe.com"))
+//        vc?.setInitialText("ResortCe")
+//        self.present(vc!, animated: true, completion: nil)
+////        if(UIApplication.shared.canOpenURL(NSURL(string: "fbapi1746934498699998://")! as URL)) {
+////            let content = FBSDKShareLinkContent()
+////            content.setValue("ResortCe", forKey: "contentTitle")
+////            content.setValue("http:www.ResortCe.com", forKey: "contentURL")
+////            FBSDKMessageDialog.show(self, delegate: <#FBSDKSharingDelegate!#>) //show(with: content, delegate: nil)
+////        }
+//        let myContent = FBSDKShareLinkContent()
+//                    myContent.setValue("ResortCe", forKey: "contentTitle")
+//                    myContent.setValue("http:www.ResortCe.com", forKey: "contentURL")
+//
+//        let content = LinkShareContent(url: URL(string: "http:www.ResortCe.com")!)
+//        //(url: URL("https://developers.facebook.com"))
+//
+//
+//        let shareDialog = ShareDialog(content: content)
+//        shareDialog.mode = .native
+//        shareDialog.failsOnInvalidData = true
+//        shareDialog.completion = { result in
+//            // Handle share results
+//            print("Result: \(result)")
+//        }
+//        do {
+//            try shareDialog.show()
+//            //all fine with jsonData here
+//        } catch {
+//            //handle error
+//            print(error)
+//        }
+        
+         if((FBSDKAccessToken.current()) != nil){
+            let vc = SLComposeViewController(forServiceType:SLServiceTypeFacebook)
+                    vc?.add(URL(string: "http:www.ResortCe.com"))
+                    vc?.setInitialText("ResortCe")
+                    self.present(vc!, animated: true, completion: nil)
+         } else {
+            let fbLoginManager : FBSDKLoginManager = FBSDKLoginManager()
+            fbLoginManager.logIn(withReadPermissions: ["public_profile","email"], from: self)
+            { (result, error) in
+                if (error == nil){
+                    let fbloginresult : FBSDKLoginManagerLoginResult = result!
+                    if fbloginresult.grantedPermissions != nil {
+                        if(fbloginresult.grantedPermissions.contains("email"))
+                        {
+                            let fbAccessToken = FBSDKAccessToken.current().tokenString
+                            print(fbAccessToken ?? "")
+                            let vc = SLComposeViewController(forServiceType:SLServiceTypeFacebook)
+                            vc?.add(URL(string: "http:www.ResortCe.com"))
+                            vc?.setInitialText("ResortCe")
+                            self.present(vc!, animated: true, completion: nil)
+                            //fbLoginManager.logOut()
+                        }
+                        else {
+                            Utilities.hideProgressView(view: self.view)
+                            Utilities.alertView(controller: self, title: "Try Again", msg: "Please try again")
+                        }
+                    }
+                    else {
+                        Utilities.hideProgressView(view: self.view)
+                    }
+                }
+                else {
+                    Utilities.hideProgressView(view: self.view)
+                }
+            }
+        }
+        
     }
     
      func BtnShareOnTwitter()

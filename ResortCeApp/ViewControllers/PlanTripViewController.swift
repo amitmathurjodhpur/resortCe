@@ -267,7 +267,20 @@ extension PlanTripViewController: GMSAutocompleteViewControllerDelegate {
         hotelCurrentLat = place.coordinate.latitude
         hotelCurrentLong = place.coordinate.longitude
         dismiss(animated: true, completion: nil)
-        let coordinate1 = CLLocation(latitude: userCurrentLat, longitude:userCurrentLong)
+        
+        if let contactNo = place.phoneNumber {
+            hotelPhoneNumber = contactNo
+        }
+        if let hotel_ID = place.placeID {
+            hotelID = hotel_ID
+        }
+        
+        if let hotel_name = place.name {
+            hotelName = hotel_name
+        }
+        hotelNametxt.text = place.formattedAddress
+        
+        /*let coordinate1 = CLLocation(latitude: userCurrentLat, longitude:userCurrentLong)
         let coordinate2 = CLLocation(latitude: hotelCurrentLat, longitude: hotelCurrentLong)
         
         let distanceInMeters = coordinate1.distance(from: coordinate2) // result is in meters
@@ -290,7 +303,7 @@ extension PlanTripViewController: GMSAutocompleteViewControllerDelegate {
                 hotelName = hotel_name
             }
             hotelNametxt.text = place.formattedAddress
-        }
+        }*/
     }
     
     func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
