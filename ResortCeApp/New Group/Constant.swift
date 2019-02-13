@@ -29,7 +29,8 @@ public struct API {
     public static let addTripExpenses              =           newbaseURL+"addExpense.php"
     public static let getTrips              =           newbaseURL+"trips.php"
     public static let addCourse              =           newbaseURL+"addCourse.php"
-    
+    public static let getHotels              =           newbaseURL+"hotels.php"
+
     public static let userProfileDetail       =    userProfileURL+"user_profile_details"
     public static let forgetPassword          =           baseURL+"forgot_password"
     public static  let lessons_list           =           baseURL+"lessons_list"

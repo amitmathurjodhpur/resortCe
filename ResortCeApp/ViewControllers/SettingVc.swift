@@ -105,7 +105,7 @@ class SettingVc: UIViewController,SFSafariViewControllerDelegate {
 //            print(error)
 //        }
         
-         if((FBSDKAccessToken.current()) != nil){
+         if((FBSDKAccessToken.current()) != nil) {
             let vc = SLComposeViewController(forServiceType:SLServiceTypeFacebook)
                     vc?.add(URL(string: "http:www.ResortCe.com"))
                     vc?.setInitialText("ResortCe")

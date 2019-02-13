@@ -7,13 +7,15 @@
 //
 
 import UIKit
+import CoreLocation
+
 class CellHome: UITableViewCell
 {
     @IBOutlet weak var LblDetailsType: UILabel!
     @IBOutlet weak var ImgVwIcon: UIImageView!
 }
 
-class HomeVc: UIViewController, NewUserDelegate {
+class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var tableView: UITableView!
     
 //    var MenuArray : [String] = ["Find Lectures","Lectures In Progress","Locker"]
@@ -21,10 +23,18 @@ class HomeVc: UIViewController, NewUserDelegate {
     
     var MenuArray : [String] = []
     var imageArray : [UIImage] = []
-   
+    var locationManager = CLLocationManager()
+    var userCurrentLat = 0.0
+    var userCurrentLong = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        userprofile()
+        getCurrentLocation()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.userprofile()
+        }
+        
         /*self.MenuArray.append("Plan A Trip")
         self.MenuArray.append("Trip Tacker")
         self.MenuArray.append("CE Tracker")
@@ -35,6 +45,24 @@ class HomeVc: UIViewController, NewUserDelegate {
         self.imageArray.append(#imageLiteral(resourceName: "CEtracker"))
         self.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
         self.tableView.reloadData()*/
+    }
+    
+    func getHotelsNearBy() {
+         if let authKey = UserDefaults.standard.value(forKey: "userid") as? String {
+            let dic = ["user_id": authKey ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString()]
+            print("Dict: \n\(dic)")
+            
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.getHotels, jsonString: dic as [String : AnyObject], success: { sucess in
+                ActivityIndicator.shared.hide()
+                if let user_dict = sucess.value(forKey: "body") as? [String:Any] {
+                    print("Data: \(user_dict)")
+                }
+                }, failure: {
+                    fail in
+                    ActivityIndicator.shared.hide()
+            })
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -103,7 +131,7 @@ class HomeVc: UIViewController, NewUserDelegate {
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler:self?.OkAction))
                         self?.present(alert, animated: true, completion: nil)
                     } else {
-                        self?.MenuArray.append("Plan A Trip")
+                        /*self?.MenuArray.append("Plan A Trip")
                         self?.MenuArray.append("Trip Tacker")
                         self?.MenuArray.append("CE Tracker")
                         self?.MenuArray.append("Resortce Concierge")
@@ -114,7 +142,8 @@ class HomeVc: UIViewController, NewUserDelegate {
                         self?.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
                         DispatchQueue.main.async {
                             self?.tableView.reloadData()
-                        }
+                        }*/
+                        self?.getHotelsNearBy()
                     }
                     print("User Completed \(isUserProfileCompleted)")
                 }
@@ -166,5 +195,38 @@ extension HomeVc : UITableViewDelegate,UITableViewDataSource
             let vc = storyboard?.instantiateViewController(withIdentifier: "resortcevc") as? ResortceViewController
             self.navigationController?.pushViewController(vc!, animated: true)
         }
+    }
+    
+    //MARK: - Location Manager
+    func getCurrentLocation() {
+        if CLLocationManager.locationServicesEnabled() {
+            switch CLLocationManager.authorizationStatus() {
+            case .notDetermined, .restricted, .denied:
+                break
+            case .authorizedAlways, .authorizedWhenInUse:
+                break
+            }
+        } else {
+            print("Location services are not enabled")
+        }
+        determineMyCurrentLocation()
+    }
+    
+    func determineMyCurrentLocation() {
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestAlwaysAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.startUpdatingLocation()
+        }
+    }
+    func locationManager(_ manager: CLLocationManager,didUpdateLocations locations: [CLLocation]) {
+        let location = manager.location?.coordinate
+        userCurrentLat = (location?.latitude) ?? 0.0
+        userCurrentLong = (location?.longitude) ?? 0.0
+        //userCurrentLocation = locationManager.location!.coordinate
+        locationManager.stopUpdatingLocation()
     }
 }

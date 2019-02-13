@@ -6,6 +6,7 @@
 //  Copyright © 2018 AJ12. All rights reserved.
 //
 import UIKit
+
 class CellMenu: UITableViewCell
 {
     @IBOutlet weak var MenuIconImgVw: UIImageView!

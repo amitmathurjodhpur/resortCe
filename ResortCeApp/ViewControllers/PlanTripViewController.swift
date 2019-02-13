@@ -68,7 +68,8 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
         if let tipText = tipNameTxt.text, !tipText.isEmpty, !hotelName.isEmpty, let startDate = startDatetxt.text, !startDate.isEmpty, let endDate = endDatetxt.text, !endDate.isEmpty, let hotelAddress = hotelNametxt.text {
             self.view.endEditing(true)
             ActivityIndicator.shared.show(self.view)
-            let dic = ["trip_name": tipText ,"hotel_name": hotelName, "hotel_address": hotelAddress, "hotel_latitude": hotelCurrentLat.toString(), "hotel_longitude":hotelCurrentLong.toString() ,"start_date":startDate,"end_date":endDate, "hotel_phone":hotelPhoneNumber, "hotel_Id":hotelID]
+            let userID = UserDefaults.standard.value(forKey: "userid")
+            let dic = ["trip_name": tipText ,"hotel_name": hotelName, "hotel_address": hotelAddress, "hotel_latitude": hotelCurrentLat.toString(), "hotel_longitude":hotelCurrentLong.toString() ,"start_date":startDate,"end_date":endDate, "hotel_phone":hotelPhoneNumber, "hotel_Id":hotelID, "user_id": userID]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.createTrip , jsonString: dic as [String : AnyObject], success: {
                 success in

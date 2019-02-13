@@ -81,6 +81,9 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
             let dict_sucess = success.value(forKey: "body") as! [String :Any]
             let auth_key =  dict_sucess["authorization_key"] as! String
             UserDefaults.standard.set(auth_key, forKey: "auth_key")
+            if let userId = dict_sucess["uid"] as? String  {
+                 UserDefaults.standard.set(userId, forKey: "userid")
+            }
             print(dict_sucess)
             print(auth_key)
             
@@ -93,7 +96,7 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
             UserDefaults.standard.set("1", forKey: AppKey.LoginStatus )
              User.iswhichUser = "1"
             UserDefaults.standard.set("1", forKey: "First")
-            
+             UserDefaults.standard.synchronize()
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "HomeVc") as? HomeVc
             self.navigationController?.pushViewController(vc!, animated: true)
         }, failure: {
@@ -166,6 +169,9 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
                             let dict_sucess = success.value(forKey: "body") as! [String :Any]
                             let auth_key =  dict_sucess["authorization_key"] as! String
                             UserDefaults.standard.set(auth_key, forKey: "auth_key")
+                            if let userId = dict_sucess["uid"] as? String  {
+                                UserDefaults.standard.set(userId, forKey: "userid")
+                            }
                             print(dict_sucess)
                             print(auth_key)
                             
@@ -178,7 +184,7 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
                             UserDefaults.standard.set("1", forKey: AppKey.LoginStatus )
                              User.iswhichUser = "1"
                              UserDefaults.standard.set("1", forKey: "First")
-                           
+                           UserDefaults.standard.synchronize()
                             let vc = self.storyboard?.instantiateViewController(withIdentifier: "HomeVc") as? HomeVc
                                     self.navigationController?.pushViewController(vc!, animated: true)
                         }, failure: {
