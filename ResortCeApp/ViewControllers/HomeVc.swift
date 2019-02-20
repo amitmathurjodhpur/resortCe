@@ -31,32 +31,44 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
         super.viewDidLoad()
         getCurrentLocation()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.userprofile()
         }
         
-        /*self.MenuArray.append("Plan A Trip")
-        self.MenuArray.append("Trip Tacker")
-        self.MenuArray.append("CE Tracker")
-        self.MenuArray.append("Resortce Concierge")
-        
-        self.imageArray.append(#imageLiteral(resourceName: "tripicon"))
-        self.imageArray.append(#imageLiteral(resourceName: "trackerIcon"))
-        self.imageArray.append(#imageLiteral(resourceName: "CEtracker"))
-        self.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
-        self.tableView.reloadData()*/
-    }
+      }
     
     func getHotelsNearBy() {
          if let authKey = UserDefaults.standard.value(forKey: "userid") as? String {
             let dic = ["user_id": authKey ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString()]
-            print("Dict: \n\(dic)")
-            
             ActivityIndicator.shared.show(self.view)
-            DataManager.postAPIWithParameters(urlString: API.getHotels, jsonString: dic as [String : AnyObject], success: { sucess in
+            DataManager.postAPIWithParameters(urlString: API.getHotels, jsonString: dic as [String : AnyObject], success: { [weak self] sucess in
                 ActivityIndicator.shared.hide()
-                if let user_dict = sucess.value(forKey: "body") as? [String:Any] {
-                    print("Data: \(user_dict)")
+                print("Hotels near by: \n \(sucess)")
+                if let count = sucess.value(forKey: "count") as? Int {
+                    if count > 0 {
+                        self?.MenuArray.append("Resortce Concierge")
+                        self?.MenuArray.append("Plan A Trip")
+                        self?.MenuArray.append("Trip Tacker")
+                        self?.MenuArray.append("CE Tracker")
+                       
+                        self?.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
+                        self?.imageArray.append(#imageLiteral(resourceName: "tripicon"))
+                        self?.imageArray.append(#imageLiteral(resourceName: "trackerIcon"))
+                        self?.imageArray.append(#imageLiteral(resourceName: "CEtracker"))
+                    } else {
+                        //self?.MenuArray.append("Resortce Concierge")
+                        self?.MenuArray.append("Plan A Trip")
+                        self?.MenuArray.append("Trip Tacker")
+                        self?.MenuArray.append("CE Tracker")
+                        
+                        //self?.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
+                        self?.imageArray.append(#imageLiteral(resourceName: "tripicon"))
+                        self?.imageArray.append(#imageLiteral(resourceName: "trackerIcon"))
+                        self?.imageArray.append(#imageLiteral(resourceName: "CEtracker"))
+                    }
+                    DispatchQueue.main.async {
+                        self?.tableView.reloadData()
+                    }
                 }
                 }, failure: {
                     fail in
@@ -169,8 +181,7 @@ extension HomeVc : UITableViewDelegate,UITableViewDataSource
         cell?.LblDetailsType.text = MenuArray[indexPath.row]
         return cell!
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
-    {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
        /* if indexPath.row == 0 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "FindLocationVc") as? FindLocationVc
             self.navigationController?.pushViewController(vc!, animated: true)
@@ -180,21 +191,40 @@ extension HomeVc : UITableViewDelegate,UITableViewDataSource
         } else if indexPath.row == 2 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "LockerVc") as? LockerVc
             self.navigationController?.pushViewController(vc!, animated: true)
-        } else*/ if indexPath.row == 0 {
-            let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
-            self.navigationController?.pushViewController(vc!, animated: true)
-        }  else if indexPath.row == 1 {
-            let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
-            vc?.shouldShowCurrent = true
-            self.navigationController?.pushViewController(vc!, animated: true)
-        } else if indexPath.row == 2 {
-            let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
-            vc?.shouldShowCurrent = false
-            self.navigationController?.pushViewController(vc!, animated: true)
-        } else if indexPath.row == 3 {
-            let vc = storyboard?.instantiateViewController(withIdentifier: "resortcevc") as? ResortceViewController
-            self.navigationController?.pushViewController(vc!, animated: true)
+        } else*/
+        if MenuArray.count == 4 {
+            if indexPath.row == 1 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
+                self.navigationController?.pushViewController(vc!, animated: true)
+               /* let vc = storyboard?.instantiateViewController(withIdentifier: "LecturesInProgressVc") as? LecturesInProgressVc
+                self.navigationController?.pushViewController(vc!, animated: true)*/
+            }  else if indexPath.row == 2 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
+                vc?.shouldShowCurrent = true
+                self.navigationController?.pushViewController(vc!, animated: true)
+            } else if indexPath.row == 3 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
+                vc?.shouldShowCurrent = false
+                self.navigationController?.pushViewController(vc!, animated: true)
+            } else if indexPath.row == 0 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "resortcevc") as? ResortceViewController
+                self.navigationController?.pushViewController(vc!, animated: true)
+            }
+        } else  if MenuArray.count == 3 {
+            if indexPath.row == 0 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
+                self.navigationController?.pushViewController(vc!, animated: true)
+            }  else if indexPath.row == 1 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
+                vc?.shouldShowCurrent = true
+                self.navigationController?.pushViewController(vc!, animated: true)
+            } else if indexPath.row == 2 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
+                vc?.shouldShowCurrent = false
+                self.navigationController?.pushViewController(vc!, animated: true)
+            }
         }
+        
     }
     
     //MARK: - Location Manager

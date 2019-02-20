@@ -102,6 +102,7 @@ class HomeMenuVc: UIViewController {
     func postLogout() {
         if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
             ActivityIndicator.shared.show(self.view)
+            print(authKey)
             DataManager.postAPIWithParameters(urlString: API.logout, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()

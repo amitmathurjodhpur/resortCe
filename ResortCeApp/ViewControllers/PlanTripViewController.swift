@@ -124,8 +124,8 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
                     print(response.count)
                     for courseObj in response {
-                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String {
-                            let course = Course.init(courseId: courseId, courseName: courseName, status: status)
+                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String, let dt = course["date"] as? String {
+                            let course = Course.init(courseId: courseId, courseName: courseName, status: status, courseDate: dt)
                             self.courseArr.append(course)
                         }
                     }

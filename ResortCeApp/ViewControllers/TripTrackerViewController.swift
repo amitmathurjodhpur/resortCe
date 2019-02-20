@@ -44,8 +44,8 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     func getTripList() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
-             let dic = ["user_id": userId]
-           // let dic = ["user_id": "184"]
+             //let dic = ["user_id": userId]
+           let dic = ["user_id": "184"]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getTrips , jsonString: dic as [String : AnyObject], success: {
                 success in
@@ -84,8 +84,8 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     func getCourseList() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
-             let dic = ["user_id": userId]
-            //let dic = ["user_id": "184"]
+             //let dic = ["user_id": userId]
+            let dic = ["user_id": "184"]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getCourses , jsonString: dic as [String : AnyObject], success: {
                 success in
@@ -94,8 +94,8 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
                     self.sectionNames = [ "In Progress Courses", "Completed Courses"]
                     for courseObj in response {
-                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String {
-                            let course = Course.init(courseId: courseId, courseName: courseName, status: status)
+                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String, let dt = course["date"] as? String {
+                            let course = Course.init(courseId: courseId, courseName: courseName, status: status, courseDate: dt)
                             if status == "0" {
                                 self.inProgressCourses.append(course)
                             } else if status == "1" {
@@ -219,14 +219,14 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
             } else {
                 if indexPath.section == 0 {
                     cell.tripTitleLabel?.text = inProgressCourses[indexPath.row].courseName
-                    cell.tripTimeLabel?.text = "2019-02-08 21:21:14"
+                    cell.tripTimeLabel?.text = inProgressCourses[indexPath.row].courseDate
                     cell.tripStatusLabel.isHidden = false
                     cell.tripStatusLabel?.text = "In Progress"
                     cell.tripStatusLabel?.textColor = UIColor.orange
                     
                 } else if indexPath.section == 1 {
                     cell.tripTitleLabel?.text = completedCourses[indexPath.row].courseName
-                    cell.tripTimeLabel?.text = "2019-02-08 21:21:14"
+                    cell.tripTimeLabel?.text = completedCourses[indexPath.row].courseDate
                     cell.tripStatusLabel.isHidden = false
                     cell.tripStatusLabel?.text = "Completed"
                     cell.tripStatusLabel?.textColor = UIColor.orange
