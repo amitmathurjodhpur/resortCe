@@ -16,6 +16,7 @@ class DataManager {
            if (NetworkReachabilityManager()?.isReachable)!{
              Alamofire.request(urlString, method: .post, parameters: jsonString).responseJSON {
                 response in
+                print("Response: \(response)")
                 switch response.result {
                 case .success:
                     ActivityIndicator.shared.hide()

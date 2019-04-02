@@ -11,6 +11,7 @@
 		22200A0121EB0C80006DA5B8 /* TripTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0021EB0C80006DA5B8 /* TripTrackerViewController.swift */; };
 		22200A0321EB12B9006DA5B8 /* TripTrackCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0221EB12B9006DA5B8 /* TripTrackCell.swift */; };
 		22200A0521EB2B3D006DA5B8 /* ResortceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0421EB2B3D006DA5B8 /* ResortceViewController.swift */; };
+		2232F8FF2222989A00242881 /* HotelListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2232F8FE2222989A00242881 /* HotelListViewController.swift */; };
 		2240B3892205997600AA8FC5 /* SignUpVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2240B3882205997600AA8FC5 /* SignUpVC.swift */; };
 		227B838121E9F4AF0097AB32 /* PlanTripViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227B838021E9F4AF0097AB32 /* PlanTripViewController.swift */; };
 		22A82A2C2208A60F0088158E /* Trip+CourseObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A82A2B2208A60E0088158E /* Trip+CourseObj.swift */; };
@@ -85,6 +86,7 @@
 		22200A0021EB0C80006DA5B8 /* TripTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTrackerViewController.swift; sourceTree = "<group>"; };
 		22200A0221EB12B9006DA5B8 /* TripTrackCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTrackCell.swift; sourceTree = "<group>"; };
 		22200A0421EB2B3D006DA5B8 /* ResortceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResortceViewController.swift; sourceTree = "<group>"; };
+		2232F8FE2222989A00242881 /* HotelListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotelListViewController.swift; sourceTree = "<group>"; };
 		2240B3882205997600AA8FC5 /* SignUpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpVC.swift; sourceTree = "<group>"; };
 		227B838021E9F4AF0097AB32 /* PlanTripViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanTripViewController.swift; sourceTree = "<group>"; };
 		22A82A2B2208A60E0088158E /* Trip+CourseObj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trip+CourseObj.swift"; sourceTree = "<group>"; };
@@ -312,6 +314,7 @@
 				22200A0421EB2B3D006DA5B8 /* ResortceViewController.swift */,
 				2240B3882205997600AA8FC5 /* SignUpVC.swift */,
 				22A82A2B2208A60E0088158E /* Trip+CourseObj.swift */,
+				2232F8FE2222989A00242881 /* HotelListViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -515,6 +518,7 @@
 				439724CF2031AF830055D4B6 /* FindLocationVc.swift in Sources */,
 				4315A6422032D49700FCD23E /* MyLecturesVc.swift in Sources */,
 				4301875220AAC0C70035C5AB /* ReportVc.swift in Sources */,
+				2232F8FF2222989A00242881 /* HotelListViewController.swift in Sources */,
 				439B82152063B09F0058B18C /* LectReviewVc3.swift in Sources */,
 				227B838121E9F4AF0097AB32 /* PlanTripViewController.swift in Sources */,
 				436A6957203D754F0071DC2A /* Utilities.swift in Sources */,

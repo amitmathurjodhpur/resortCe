@@ -67,14 +67,7 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
                         self.expenseDate.text = ""
                         self.currentImage = nil
                     }
-                    /*let viewControllers: [UIViewController] = self.navigationController!.viewControllers
-                    for aViewController in viewControllers {
-                        if aViewController is LockerVc {
-                            self.navigationController!.popToViewController(aViewController, animated: true)
-                        }
-                    }*/
-                   
-                }, failure: {
+                     }, failure: {
                     fail in
                     ActivityIndicator.shared.hide()
                 })
@@ -138,6 +131,7 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
     func moveToTrips() {
         let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
         vc?.shouldShowCurrent = true
+        vc?.showTripsOnly = true
         self.navigationController?.pushViewController(vc!, animated: true)
     }
    
@@ -158,5 +152,21 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
         currentTripId = ""
         currentImage = nil
         courseArr.removeAll()
+        selectedCourses.removeAll()
     }
 }
+extension PlanTripViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return pickerData.count
+    }
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return pickerData[row]
+    }
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        self.expenseTypeTxt.text = pickerData[row]
+    }
+}
+

@@ -15,6 +15,7 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     var expandedSectionHeader: UITableViewHeaderFooterView!
     var sectionNames: Array<Any> = []
     var shouldShowCurrent: Bool = false
+    var showTripsOnly: Bool = false
     var currentTrips: [Trip] = []
     var inProgressTrips: [Trip] = []
     var completedTrips: [Trip] = []
@@ -23,7 +24,13 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.isNavigationBarHidden  = false
+        
+        if showTripsOnly {
+            self.navigationItem.setHidesBackButton(true, animated:true)
+            let barButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(dismissView))
+            self.navigationItem.rightBarButtonItem = barButtonItem
+        }
+        
         tableView.estimatedRowHeight = 44.0
         tableView.rowHeight = UITableViewAutomaticDimension
         if shouldShowCurrent {
@@ -34,9 +41,13 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
             getCourseList()
         }
        
-        self.tableView!.tableFooterView = UIView()
+        self.tableView.tableFooterView = UIView()
     }
    
+    @objc fileprivate func dismissView() {
+        self.navigationController?.backToViewController(viewController: HomeVc.self)
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.isNavigationBarHidden  = false
     }
@@ -44,8 +55,8 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     func getTripList() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
-             //let dic = ["user_id": userId]
-           let dic = ["user_id": "184"]
+             let dic = ["user_id": userId]
+           //let dic = ["user_id": "184"]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getTrips , jsonString: dic as [String : AnyObject], success: {
                 success in
@@ -84,8 +95,10 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     func getCourseList() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
-             //let dic = ["user_id": userId]
-            let dic = ["user_id": "184"]
+             let dic = ["user_id": userId]
+            //let dic = ["user_id": "196"]
+            // let dic = ["user_id": "184"]
+            
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getCourses , jsonString: dic as [String : AnyObject], success: {
                 success in

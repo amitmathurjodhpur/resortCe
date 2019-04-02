@@ -39,111 +39,122 @@ class TripReportVc: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print(GetReportTrip)
-        PlaceholderArray[0] = GetReportTrip["trip_name"] as! String
-        PlaceholderArray[1] = GetReportTrip["total_course"] as! String
-        PlaceholderArray[2] = dateConvert(GetReportTrip["trip_date"] as! String)
-        ExpenseArray = GetReportTrip["expensis"] as! [[String : Any]]
-        CoursesArray = GetReportTrip["courses"] as! [[String : Any]]
-       
+        PlaceholderArray[0] = GetReportTrip["trip_name"] as? String ?? ""
+        PlaceholderArray[1] = GetReportTrip["total_course"] as? String ?? ""
+        PlaceholderArray[2] = dateConvert(GetReportTrip["trip_date"] as? String ?? "")
+        ExpenseArray = GetReportTrip["expensis"] as? [[String : Any]] ?? []
+        CoursesArray = GetReportTrip["courses"] as? [[String : Any]] ?? []
     }
-    func dateConvert(_ TimeStamp:String) -> String
-    {
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.isNavigationBarHidden  = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden  = false
+    }
+    
+    func dateConvert(_ TimeStamp:String) -> String {
         let unixTimestamp = TimeStamp
-        let date = Date(timeIntervalSince1970: Double(unixTimestamp as! String)!)
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
-        dateFormatter.locale = NSLocale.current
-        dateFormatter.dateFormat = "MM/dd/yyyy"
-        let strDate = dateFormatter.string(from: date)
-        return strDate
+        if let timeStamp = Double(unixTimestamp) {
+            let date = Date(timeIntervalSince1970: timeStamp)
+            let dateFormatter = DateFormatter()
+            dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
+            dateFormatter.locale = NSLocale.current
+            dateFormatter.dateFormat = "MM/dd/yyyy"
+            let strDate = dateFormatter.string(from: date)
+            return strDate
+        }
+        return ""
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    @IBAction func ActnBack(_ sender: Any)
-    {
+    @IBAction func ActnBack(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
-    @IBAction func ActnSave(_ sender: Any)
-    {
+    @IBAction func ActnSave(_ sender: Any) {
         postTripReportPDF()
     }
     
     func load(_ StrURL: String,_ Name:String) {
         // Create destination URL
-        let documentsUrl:URL =  FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last as URL!
-        let destinationFileUrl = documentsUrl.appendingPathComponent("Trip\(Name).pdf")
-        //Create URL to the source file you want to download
-        let fileURL = URL(string: StrURL)
-        let sessionConfig = URLSessionConfiguration.default
-        let session = URLSession(configuration: sessionConfig)
-        let request = URLRequest(url:fileURL!)
-        let task = session.downloadTask(with: request) { (tempLocalUrl, response, error) in
-            if let tempLocalUrl = tempLocalUrl, error == nil {
-                // Success
-                if let statusCode = (response as? HTTPURLResponse)?.statusCode {
-                    print("Successfully downloaded. Status code: \(statusCode)")
+        if let documentsUrl =  FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last {
+            let destinationFileUrl = documentsUrl.appendingPathComponent("Trip\(Name).pdf")
+            //Create URL to the source file you want to download
+            let sessionConfig = URLSessionConfiguration.default
+            let session = URLSession(configuration: sessionConfig)
+            if let fileURL = URL(string: StrURL) {
+                let request = URLRequest(url: fileURL)
+                let task = session.downloadTask(with: request) { (tempLocalUrl, response, error) in
+                    if let tempLocalUrl = tempLocalUrl, error == nil {
+                        // Success
+                        if let statusCode = (response as? HTTPURLResponse)?.statusCode {
+                            print("Successfully downloaded. Status code: \(statusCode)")
+                        }
+                        do {
+                            try FileManager.default.copyItem(at: tempLocalUrl, to: destinationFileUrl)
+                            UIAlertController.show(self, "Pdf", "Saved successfully")
+                        } catch (let writeError) {
+                            UIAlertController.show(self, "Pdf", "AlreadyExists")
+                            print("Error creating a file \(destinationFileUrl) : \(writeError)")
+                        }
+                    } else {
+                        print("Error took place while downloading a file. Error description: %@", error?.localizedDescription ?? "")
+                    }
                 }
-                do {
-                    try FileManager.default.copyItem(at: tempLocalUrl, to: destinationFileUrl)
-                     UIAlertController.show(self, "Pdf", "Saved successfully")
-                } catch (let writeError) {
-                    UIAlertController.show(self, "Pdf", "AlreadyExists")
-                    print("Error creating a file \(destinationFileUrl) : \(writeError)")
-                }
-            } else {
-                print("Error took place while downloading a file. Error description: %@", error?.localizedDescription);
+                task.resume()
             }
         }
-        task.resume()
     }
-    func postTripReportPDF()
-    {
-        let TripId = GetReportTrip["id"] as! String
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.create_pdf_for_expenses, jsonString: Request.CreatePdfCertificateOfTrips(UserDefaults.standard.value(forKey: "authKey") as! String,TripId,"") as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            let body = sucess["body"] as! String
-            self.load(body,"\(self.GetReportTrip["trip_name"] as! String)\(TripId)")
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+    
+    func postTripReportPDF() {
+        if let TripId = GetReportTrip["id"] as? String, let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.create_pdf_for_expenses, jsonString: Request.CreatePdfCertificateOfTrips(authKey,TripId,"") as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                if let body = sucess["body"] as? String, let reportTrip = self.GetReportTrip["trip_name"] as? String {
+                    self.load(body,"\(reportTrip)\(TripId)")
+                }
+                
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
     }
-    func DeleteExpense(_ ExpenseId:String)
-    {
-        let TripId = GetReportTrip["id"] as! String
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.DeleteExpenses, jsonString: Request.DeleteExpenses(UserDefaults.standard.value(forKey: "authKey") as! String,TripId,ExpenseId) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            self.navigationController?.popViewController(animated: true)
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+    
+    func DeleteExpense(_ ExpenseId:String) {
+        if let TripId = GetReportTrip["id"] as? String, let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.DeleteExpenses, jsonString: Request.DeleteExpenses(authKey,TripId,ExpenseId) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                self.navigationController?.popViewController(animated: true)
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+        
     }
 }
-extension TripReportVc:UITableViewDelegate,UITableViewDataSource
-{
-    func numberOfSections(in tableView: UITableView) -> Int
-    {
+
+extension TripReportVc:UITableViewDelegate,UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 3
     }
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
-    {
-        if section == 0
-        {
-        return 1
-        }
-        else if section == 1
-        {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return 1
+        } else if section == 1 {
              return CoursesArray.count
-        }else
-        {
+        } else {
             return ExpenseArray.count
         }
     }
@@ -154,7 +165,8 @@ extension TripReportVc:UITableViewDelegate,UITableViewDataSource
         {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CellReport", for: indexPath) as? CellReport
         cell?.LblTripName.text = GetReportTrip["trip_name"] as? String
-        cell?.LblTripDate.text = dateConvert(GetReportTrip["trip_date"] as! String) + " - " + dateConvert(GetReportTrip["trip_end_date"] as! String)
+          
+        cell?.LblTripDate.text = dateConvert(GetReportTrip["trip_date"] as? String ?? "") + " - " + dateConvert(GetReportTrip["trip_end_date"] as? String ?? "")
             
         return cell!
         }else if indexPath.section == 1

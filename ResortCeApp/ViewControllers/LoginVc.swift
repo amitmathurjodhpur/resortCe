@@ -83,6 +83,7 @@ class LoginVc : UIViewController,GIDSignInDelegate, GIDSignInUIDelegate {
             UserDefaults.standard.set(auth_key, forKey: "auth_key")
             if let userId = dict_sucess["id"] as? String  {
                  UserDefaults.standard.set(userId, forKey: "userid")
+                //UserDefaults.standard.set("204", forKey: "userid")
             }
             print(dict_sucess)
             print(auth_key)

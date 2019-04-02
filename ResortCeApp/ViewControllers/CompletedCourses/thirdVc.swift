@@ -39,10 +39,17 @@ class thirdVc: UIViewController,UIWebViewDelegate {
             ParentVw.layer.cornerRadius = 3
             
         }
-        override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            self.postCourseContent()
-        }
+       
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.isNavigationBarHidden  = true
+        self.postCourseContent()
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden  = false
+    }
         override func didReceiveMemoryWarning() {
             super.didReceiveMemoryWarning()
             

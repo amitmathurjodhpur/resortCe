@@ -27,7 +27,10 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     @IBOutlet weak var expenseAmountTxt: UITextField!
     @IBOutlet weak var expenseDate: UITextField!
     
+    @IBOutlet weak var nextBtn: UIButton!
+   
     let datePicker = UIDatePicker()
+    var expensePicker = UIPickerView()
     var locationManager = CLLocationManager()
     var tableDataSource: GMSAutocompleteTableDataSource?
     var userCurrentLat = 0.0
@@ -42,6 +45,8 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     var currentTripId: String = ""
     var currentImage: UIImage?
     var courseArr: [Course] = []
+    var selectedCourses: [String] = []
+    var pickerData = ["Lodging" , "Transportation/Airfare" , "Meals" , "Other"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +56,7 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     func configureView() {
         self.navigationController?.isNavigationBarHidden = false
         self.title = "Resortcee"
-        
+        nextBtn.isHidden = true
         self.tipNameView.isHidden = false
         self.courseView.isHidden = true
         self.addExpenseView.isHidden = true
@@ -62,10 +67,11 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
         endDatetxt.delegate = self
         startDatetxt.delegate = self
         expenseDate.delegate = self
+        expenseTypeTxt.delegate = self
     }
     
     @IBAction func nextClick(_ sender: Any) {
-        if let tipText = tipNameTxt.text, !tipText.isEmpty, !hotelName.isEmpty, let startDate = startDatetxt.text, !startDate.isEmpty, let endDate = endDatetxt.text, !endDate.isEmpty, let hotelAddress = hotelNametxt.text {
+      if let tipText = tipNameTxt.text, !tipText.isEmpty, !hotelName.isEmpty, let startDate = startDatetxt.text, !startDate.isEmpty, let endDate = endDatetxt.text, !endDate.isEmpty, let hotelAddress = hotelNametxt.text {
             self.view.endEditing(true)
             ActivityIndicator.shared.show(self.view)
             let userID = UserDefaults.standard.value(forKey: "userid")
@@ -83,9 +89,10 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
                         UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
                          self?.tipNameView.isHidden = true
                          self?.courseView.isHidden = false
+                         self?.nextBtn.isHidden = false
                          self?.addExpenseView.isHidden = true
                          self?.segmentView.selectedSegmentIndex = 1
-                            self?.getCourseList()
+                        self?.getCourseList()
                          })
                     } else {
                         if let message = response["message"] as? String {
@@ -104,6 +111,7 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
         }
 //        UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
 //            self?.tipNameView.isHidden = true
+//            self?.nextBtn.isHidden = false
 //            self?.courseView.isHidden = false
 //            self?.addExpenseView.isHidden = true
 //            self?.segmentView.selectedSegmentIndex = 1
@@ -114,8 +122,8 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     func getCourseList() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
-           // let dic = ["user_id": userId]
-             let dic = ["user_id": "184"]
+          let dic = ["user_id": userId]
+            // let dic = ["user_id": "204"]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getCourses , jsonString: dic as [String : AnyObject], success: {
                 success in
@@ -179,7 +187,7 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     //MARK: - SEARCH LOCATION ON MAP
     func searchBarBtnPressed(_ sender: Any) {
         let autocompleteController = GMSAutocompleteViewController()
-        autocompleteController.delegate = self
+       autocompleteController.delegate = self
         present(autocompleteController, animated: true, completion: nil)
     }
     
@@ -215,6 +223,30 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
         expenseDate.inputView = datePicker
     }
     
+    func pickUp(_ textField : UITextField){
+        
+        // UIPickerView
+        self.expensePicker = UIPickerView(frame:CGRect(x: 0, y: 0, width: self.view.frame.size.width, height: 216))
+        self.expensePicker.delegate = self
+        self.expensePicker.dataSource = self
+        self.expensePicker.backgroundColor = UIColor.white
+        textField.inputView = self.expensePicker
+        
+        // ToolBar
+        let toolBar = UIToolbar()
+        toolBar.barStyle = .default
+        toolBar.isTranslucent = true
+        toolBar.sizeToFit()
+        
+        // Adding Button ToolBar
+        let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(PlanTripViewController.cancelDatePicker))
+        let spaceButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let cancelButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(PlanTripViewController.cancelDatePicker))
+        toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
+        toolBar.isUserInteractionEnabled = true
+        textField.inputAccessoryView = toolBar
+    }
+    
     @objc func donedatePicker() {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd/yyyy"
@@ -246,12 +278,16 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     func textFieldDidBeginEditing(_ textField: UITextField) {
          if textField == startDatetxt {
             type = 1
+            self.datePickerVw()
          } else if textField == endDatetxt {
             type = 2
+            self.datePickerVw()
          } else if textField == expenseDate {
             type = 3
+            self.datePickerVw()
+         } else if textField == expenseTypeTxt {
+             self.pickUp(textField)
         }
-        self.datePickerVw()
    }
    
     override func didReceiveMemoryWarning() {
@@ -323,18 +359,22 @@ extension PlanTripViewController: GMSAutocompleteViewControllerDelegate {
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
 }
-extension PlanTripViewController : UITableViewDelegate,UITableViewDataSource
-{
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
-    {
+extension PlanTripViewController : UITableViewDelegate,UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return courseArr.count
     }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
-    {
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "coursecell") {
+            
             cell.textLabel?.text = courseArr[indexPath.row].courseName
             cell.textLabel?.numberOfLines = 0
             cell.textLabel?.lineBreakMode = .byWordWrapping
+            if selectedCourses.contains(courseArr[indexPath.row].courseId) {
+                cell.accessoryType = .checkmark
+            } else {
+                cell.accessoryType = .none
+            }
             return cell
         }
         return UITableViewCell()
@@ -342,23 +382,32 @@ extension PlanTripViewController : UITableViewDelegate,UITableViewDataSource
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-            let courseId = courseArr[indexPath.row].courseId
-            let tripID = self.currentTripId
-            ActivityIndicator.shared.show(self.view)
-            let dic = ["trip_id": tripID, "course_id": courseId]
-            print("Dict: \n\(dic)")
-            DataManager.postAPIWithParameters(urlString: API.addCourse , jsonString: dic as [String : AnyObject], success: {
-                success in
-                ActivityIndicator.shared.hide()
-                self.moveToExpense()
-            }, failure: {
-                failure in
-                ActivityIndicator.shared.hide()
-                self.moveToExpense()
-                print(failure)
-            })
+        let courseId = courseArr[indexPath.row].courseId
+        if selectedCourses.contains(courseId), let index = selectedCourses.index(of: courseId) {
+            selectedCourses.remove(at: index)
+            tableView.cellForRow(at: indexPath)?.accessoryType = .none
+        } else {
+            selectedCourses.append(courseId)
+            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+        }
     }
 
+   @IBAction func addCourses(_ sender: Any) {
+        let tripID = self.currentTripId
+        ActivityIndicator.shared.show(self.view)
+        let dic = ["trip_id": tripID, "course_id": selectedCourses.joined(separator:",")]
+        DataManager.postAPIWithParameters(urlString: API.addCourse , jsonString: dic as [String : AnyObject], success: {
+            success in
+            ActivityIndicator.shared.hide()
+            self.moveToExpense()
+        }, failure: {
+            failure in
+            ActivityIndicator.shared.hide()
+            self.moveToExpense()
+            print(failure)
+        })
+    }
+    
     func moveToExpense() {
         DispatchQueue.main.async {
             UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
@@ -366,6 +415,7 @@ extension PlanTripViewController : UITableViewDelegate,UITableViewDataSource
                 self?.courseView.isHidden = true
                 self?.addExpenseView.isHidden = false
                 self?.segmentView.selectedSegmentIndex = 2
+                self?.nextBtn.isHidden = true
             })
         }
     }

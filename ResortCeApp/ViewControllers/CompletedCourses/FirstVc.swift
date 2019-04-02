@@ -47,36 +47,44 @@ class FirstVc: UIViewController,UIWebViewDelegate {
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.isNavigationBarHidden  = true
         self.postCourseContent()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden  = false
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
     func postCourseContent() {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.course_content_listing, jsonString: Request.oneCourseId(UserDefaults.standard.value(forKey: "auth_key") as! String,  getReview) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            self.dict  = (sucess["body"] as? [String:Any])!
-            let values = self.dict
-            let allContent = values["course_content"] as! [[String:Any]]
-            let QuestionsAnswer = allContent[0]
-            self.contentArray = QuestionsAnswer["Questions"] as! [[String:Any]]
-            for i in 0..<2
-            {
-                let correct = self.contentArray[i]
-                self.correctanswer.append(correct["correct_answer"] as! String)
-            }
-           
-            self.TxtViewContent.text = (QuestionsAnswer["content"] as? String)?.html2String
-           self.TxtViewContent.isHidden = true
-            let HtmlString = QuestionsAnswer["content"] as! String
-            self.webVw.loadHTMLString(HtmlString, baseURL: nil)
-            self.TblVwContent.reloadData()
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+        if let authKey = UserDefaults.standard.value(forKey: "auth_key") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.course_content_listing, jsonString: Request.oneCourseId(authKey,  getReview) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                self.dict  = (sucess["body"] as? [String:Any])!
+                let values = self.dict
+                let allContent = values["course_content"] as! [[String:Any]]
+                let QuestionsAnswer = allContent[0]
+                self.contentArray = QuestionsAnswer["Questions"] as! [[String:Any]]
+                for i in 0..<2
+                {
+                    let correct = self.contentArray[i]
+                    self.correctanswer.append(correct["correct_answer"] as! String)
+                }
+                
+                self.TxtViewContent.text = (QuestionsAnswer["content"] as? String)?.html2String
+                self.TxtViewContent.isHidden = true
+                let HtmlString = QuestionsAnswer["content"] as! String
+                self.webVw.loadHTMLString(HtmlString, baseURL: nil)
+                self.TblVwContent.reloadData()
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+       
     }
     @IBAction func ActnSubmitBtn(_ sender: Any)
     {

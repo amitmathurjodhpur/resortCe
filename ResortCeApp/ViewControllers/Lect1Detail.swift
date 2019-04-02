@@ -57,7 +57,7 @@ class Lect1Detail: UIViewController {
     override func viewWillAppear(_ animated: Bool)
     {
         super.viewWillAppear(animated)
-        postOneCourseList()
+        getOneCourseList()
     }
     override func viewWillDisappear(_ animated: Bool)
     {
@@ -70,106 +70,102 @@ class Lect1Detail: UIViewController {
         super.viewDidAppear(animated)
         //SKPaymentQueue.default().add(self)
     }
-    func postOneCourseList() {
-        ActivityIndicator.shared.show(self.view)
-        print(detail)
-        DataManager.postAPIWithParameters(urlString: API.one_course_list, jsonString: Request.oneCourseId(UserDefaults.standard.value(forKey: "auth_key") as! String, detail) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            let dict  = (sucess["body"] as? [[String:Any]])!
-            print(dict)
-            let values = dict[0]
-            self.TxtVwDetails.text = values["overview"] as? String
-            self.credits.text = values["credit"] as? String
-            self.LblHeading.text = values["name"] as? String
-            self.favBtnType = values["favourite"] as! String
-            self.buyBtnTYpe = values["buy"] as! String
-            self.ItunesId = values["itune_product_id"] as? String
-            let fee = values["fee"] as? String
-            self.CourseFee = NSDecimalNumber(string: fee)
-            self.CourseName = (values["name"] as? String)!
-            self.setHeartBtn()
-            self.setBuyBtn()
-        }, failure: {  
-            fail in
-            ActivityIndicator.shared.hide()
-        })
-    }
-    
-    func addToFAv()
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.course_add_to_favourite, jsonString: Request.AddtoFav((UserDefaults.standard.value(forKey: "authKey") as? String)!, detail, favBtnType) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            let user_dict = sucess.value(forKey: "body") as! [String:Any]
-            print(user_dict)
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
-    }
-    func PostaddToBuy()
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.course_add_to_buy, jsonString: Request.AddtoBuy((UserDefaults.standard.value(forKey: "authKey") as? String)!,detail,buyBtnTYpe,groupid,DatahotelDict["HotelId"] as! String, DatahotelDict["HotelName"] as! String, DatahotelDict["HotelAddress"] as! String, DatahotelDict["HotelLatitude"] as! String, DatahotelDict["HotelLongitude"] as! String, DatahotelDict["HotelWebsite"] as! String, DatahotelDict["HotelPhone"] as! String) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            self.BuyBtn.setTitle("Purchased", for: .normal)
-            
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
-    }
-    //////
-    func PostApplePayStripe(_ token:String,completion: @escaping (_: PKPaymentAuthorizationStatus) -> Void)
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.PaymentStripeApplePay, jsonString: Request.StripeApplePay((UserDefaults.standard.value(forKey: "authKey") as? String)!,detail,token,StringCourseFee) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            self.PostaddToBuy()
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
-    }
-    
-    func  setHeartBtn()
-    {
-        print(self.favBtnType)
-        if  self.favBtnType == "1"
-        {
-            HeartBtn.setImage(#imageLiteral(resourceName: "RedHeart"), for: .normal)
+    func getOneCourseList() {
+        if let authKey = UserDefaults.standard.value(forKey: "auth_key") as? String {
+            ActivityIndicator.shared.show(self.view)
+            print(detail)
+            DataManager.postAPIWithParameters(urlString: API.one_course_list, jsonString: Request.oneCourseId(authKey, detail) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                let dict  = (sucess["body"] as? [[String:Any]])!
+                print(dict)
+                let values = dict[0]
+                self.TxtVwDetails.text = values["overview"] as? String
+                self.credits.text = values["credit"] as? String
+                self.LblHeading.text = values["name"] as? String
+                self.favBtnType = values["favourite"] as! String
+                self.buyBtnTYpe = values["buy"] as! String
+                self.ItunesId = values["itune_product_id"] as? String
+                let fee = values["fee"] as? String
+                self.CourseFee = NSDecimalNumber(string: fee)
+                self.CourseName = (values["name"] as? String)!
+                self.setHeartBtn()
+                self.setBuyBtn()
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
         }
-        else
-        {
+    }
+    
+    func addToFAv() {
+         if let authKey = UserDefaults.standard.value(forKey: "auth_key") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.course_add_to_favourite, jsonString: Request.AddtoFav(authKey, detail, favBtnType) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                let user_dict = sucess.value(forKey: "body") as! [String:Any]
+                print(user_dict)
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+    }
+    
+    func PostaddToBuy() {
+         if let authKey = UserDefaults.standard.value(forKey: "auth_key") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.course_add_to_buy, jsonString: Request.AddtoBuy(authKey,detail,buyBtnTYpe,groupid,DatahotelDict["HotelId"] as! String, DatahotelDict["HotelName"] as! String, DatahotelDict["HotelAddress"] as! String, DatahotelDict["HotelLatitude"] as! String, DatahotelDict["HotelLongitude"] as! String, DatahotelDict["HotelWebsite"] as! String, DatahotelDict["HotelPhone"] as! String) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                self.BuyBtn.setTitle("Purchased", for: .normal)
+                
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+    }
+    
+    //////
+    func PostApplePayStripe(_ token:String,completion: @escaping (_: PKPaymentAuthorizationStatus) -> Void) {
+        if let authKey = UserDefaults.standard.value(forKey: "auth_key") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.PaymentStripeApplePay, jsonString: Request.StripeApplePay(authKey,detail,token,StringCourseFee) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                self.PostaddToBuy()
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+    }
+    
+    func  setHeartBtn() {
+        print(self.favBtnType)
+        if  self.favBtnType == "1" {
+            HeartBtn.setImage(#imageLiteral(resourceName: "RedHeart"), for: .normal)
+        } else {
             HeartBtn.setImage(#imageLiteral(resourceName: "heraticon"), for: .normal)
         }
     }
     
-    func setBuyBtn()
-    {
-        if  self.buyBtnTYpe == "1"
-        {
+    func setBuyBtn() {
+        if  self.buyBtnTYpe == "1" {
             BuyBtn.setTitle("Purchased", for: .normal)
-        }
-        else
-        {
-               BuyBtn.setTitle("Buy", for: .normal)
+        } else {
+            BuyBtn.setTitle("Buy", for: .normal)
         }
     }
-    @IBAction func ActnHeartBtn(_ sender: UIButton)
-    {
-        if sender.currentImage == #imageLiteral(resourceName: "heraticon")
-        {
+    
+    @IBAction func ActnHeartBtn(_ sender: UIButton) {
+        if sender.currentImage == #imageLiteral(resourceName: "heraticon") {
             sender.setImage(#imageLiteral(resourceName: "RedHeart"), for: .normal)
             favBtnType = "1"
             self.addToFAv()
-        }
-        else
-        {
+        } else {
             sender.setImage(#imageLiteral(resourceName: "heraticon"), for: .normal)
             favBtnType = "2"
             self.addToFAv()
@@ -201,20 +197,15 @@ class Lect1Detail: UIViewController {
 //        }
 //    }
 
-    @IBAction func ActnBuyBtn(_ sender: UIButton)
-    {
-        if sender.currentTitle == "Buy"
-        {
+    @IBAction func ActnBuyBtn(_ sender: UIButton) {
+        if sender.currentTitle == "Buy"  {
             ActivityIndicator.shared.show(self.view)
             // self.AppleBtnAction()
             if (SKPaymentQueue.canMakePayments()) {
-                
-                
                 let productID:NSSet = NSSet(objects: ProductIDs.ResortCeFirst,ProductIDs.ResortCeSecond,ProductIDs.ResortCeThird,ProductIDs.ResortCeFourth)
                 let productsRequest:SKProductsRequest = SKProductsRequest(productIdentifiers: productID as! Set<String>);
                 productsRequest.delegate = self;
                 productsRequest.start();
-                
                 print("Fetching Products");
             } else {
                 print("can't make purchases");
@@ -222,27 +213,21 @@ class Lect1Detail: UIViewController {
             detail = String(sender.tag)
             buyBtnTYpe = "1"
         }
-        else if sender.currentTitle == "No Product"
-        {
+        else if sender.currentTitle == "No Product" {
             Toast(text: "No Product Found").show()
-        }
-        else
-        {
+        } else {
             Toast(text: "Already Purchased").show()
         }
     }
     
-    func buyProduct(product: SKProduct)
-    {
+    func buyProduct(product: SKProduct) {
         print("Sending the Payment Request to Apple")
         let payment = SKPayment(product: product)
         SKPaymentQueue.default().add(payment)
          ActivityIndicator.shared.hide()
-        
-       
     }
-    @IBAction func ActnBack(_ sender: Any)
-    {
+    
+    @IBAction func ActnBack(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
     override func didReceiveMemoryWarning() {
@@ -255,20 +240,16 @@ extension Lect1Detail: SKProductsRequestDelegate,SKPaymentTransactionObserver{
         print(response.products)
         var ProductIndex = Int()
         var productIdIndex = ""
-        if StringCourseFee == "1"
-        {
+        if StringCourseFee == "1" {
             ProductIndex = 0
             productIdIndex = ProductID.ResortCeFirst
-        }else if StringCourseFee == "10"
-        {
+        } else if StringCourseFee == "10" {
             ProductIndex = 1
             productIdIndex = ProductID.ResortCeFourth
-        }else if StringCourseFee == "20"
-        {
+        } else if StringCourseFee == "20" {
             ProductIndex = 2
             productIdIndex = ProductID.ResortCeSecond
-        }else if StringCourseFee == "30"
-        {
+        } else if StringCourseFee == "30" {
             ProductIndex = 3
             productIdIndex = ProductID.ResortCeThird
         }
@@ -288,32 +269,24 @@ extension Lect1Detail: SKProductsRequestDelegate,SKPaymentTransactionObserver{
         }
     }
     
-    func request(_ request: SKRequest, didFailWithError error: Error)
-    {
+    func request(_ request: SKRequest, didFailWithError error: Error) {
         print("request fail")
     }
-    func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error)
-    {
+    func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         print("error")
     }
-    func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue)
-    {
+    func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         print("restored")
     }
-    func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction])
-    {
+    func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction]) {
         print("transaction Removed")
-        
     }
     
     // MARK:- IAP PAYMENT QUEUE
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
-        if SKPaymentQueue.canMakePayments()
-        {
+        if SKPaymentQueue.canMakePayments() {
             print("Yes")
-        }
-        else
-        {
+        } else {
             print("no")
         }
         for transaction:AnyObject in transactions {

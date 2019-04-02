@@ -35,3 +35,25 @@ class Trip {
         self.tripDate = tripDate
     }
 }
+
+class Hotel {
+    var hotelId: String = ""
+    var hotelName: String = ""
+    var hotelAddress: String = ""
+    var hotelLat: String = ""
+    var hotelLong: String = ""
+    var hotelPhoneNo: String = ""
+    var hotelWebsite: String = ""
+    var coursesInHotel: [Course] = []
+   
+    init(hotelId: String, hotelName: String, hotelAddress: String, hotelLat: String, hotelLong: String, hotelPhoneNo: String, hotelWebsite: String, coursesInHotel: [Course]) {
+        self.hotelId = hotelId
+        self.hotelName = hotelName
+        self.hotelAddress = hotelAddress
+        self.hotelLat = hotelLat
+        self.hotelLong = hotelLong
+        self.hotelPhoneNo = hotelPhoneNo
+        self.hotelWebsite = hotelWebsite
+        self.coursesInHotel = coursesInHotel
+    }
+}

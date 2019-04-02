@@ -66,16 +66,13 @@ class CreateTripVcViewController: UIViewController {
         TypeOfExpensis.delegate = self
         ExpenseAmountTF.delegate = self
         DispatchQueue.main.async {
-            self.VwAddTrip.frame = CGRect(x: 0, y: 0, width: self.ParentVw.frame.width, height: self.ParentVw.frame.height)
+            self.VwAddTrip.frame = CGRect(x: 0, y: 44, width: self.ParentVw.frame.width, height: self.ParentVw.frame.height)
             self.ParentVw.addSubview(self.VwAddTrip)
         }
-        self.PostCourseListing()
+            self.PostCourseListing()
             LblHeadingTitle.text = "Create a Trip"
             BtnNext1.isHidden = false
             BtnNext2.isHidden = false
-        
-        
-        
     }
     func FillData()
     {
@@ -105,14 +102,16 @@ class CreateTripVcViewController: UIViewController {
     func dateConvert(_ TimeStamp:String) -> String
     {
         let unixTimestamp = TimeStamp
-        let date = Date(timeIntervalSince1970: Double(unixTimestamp as! String)!)
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
-        dateFormatter.locale = NSLocale.current
-        dateFormatter.dateFormat = "MM/dd/yyyy"
-        let strDate = dateFormatter.string(from: date)
-        return strDate
-        
+        if let timeStamp = Double(unixTimestamp) {
+            let date = Date(timeIntervalSince1970: timeStamp)
+            let dateFormatter = DateFormatter()
+            dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
+            dateFormatter.locale = NSLocale.current
+            dateFormatter.dateFormat = "MM/dd/yyyy"
+            let strDate = dateFormatter.string(from: date)
+            return strDate
+        }
+        return ""
     }
     
     // date Picker

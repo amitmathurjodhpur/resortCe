@@ -51,13 +51,15 @@ class ResortceViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.row == 0 {
-            let vc = storyboard?.instantiateViewController(withIdentifier: "FindLocationVc") as? FindLocationVc
+            /*let vc = storyboard?.instantiateViewController(withIdentifier: "FindLocationVc") as? FindLocationVc
+            self.navigationController?.pushViewController(vc!, animated: true)*/
+            let vc = storyboard?.instantiateViewController(withIdentifier: "hotellistvc") as? HotelListViewController
             self.navigationController?.pushViewController(vc!, animated: true)
         } else  if indexPath.row == 2 {
-           /* let vc = storyboard?.instantiateViewController(withIdentifier: "LecturesInProgressVc") as? LecturesInProgressVc
-            self.navigationController?.pushViewController(vc!, animated: true)*/
-            let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
-            vc?.shouldShowCurrent = false
+            let vc = storyboard?.instantiateViewController(withIdentifier: "LockerVc") as? LockerVc
+            self.navigationController?.pushViewController(vc!, animated: true)
+        } else  if indexPath.row == 1 {
+            let vc = storyboard?.instantiateViewController(withIdentifier: "LockerVc") as? LockerVc
             self.navigationController?.pushViewController(vc!, animated: true)
         }
     }

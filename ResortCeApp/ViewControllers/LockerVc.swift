@@ -43,61 +43,73 @@ class LockerVc: UIViewController{
     {
         super.viewDidLoad()
         postLectInProgress()
-        PostLockerList()
+       PostLockerList()
     }
-    override func viewWillAppear(_ animated: Bool)
-    {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.isNavigationBarHidden  = true
         postTripListing()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden  = false
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
     
     // web services
-    func PostLockerList()
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.LockerCourseListing, jsonString: Request.setauthKey(UserDefaults.standard.value(forKey: "authKey") as! String) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            self.nameArray = sucess["body"] as! [[String:Any]]
-            self.CollVw.reloadData()
-        
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-
-        })
-    }
-    func postLectInProgress() {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.course_in_progress_listing
-            , jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
+    func PostLockerList() {
+         if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.LockerCourseListing, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()
-                
-                self.ProgressArray  = (sucess["body"] as? [[String:Any]])!
-                self.CollVw.reloadData()
-                
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+                 if let namesObj = sucess["body"] as? [[String:Any]] {
+                    self.nameArray = namesObj
+                    self.CollVw.reloadData()
+                }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
     }
-    func postTripListing()
-    {
-        ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.TripListing, jsonString: Request.setauthKey((UserDefaults.standard.value(forKey: "authKey") as? String)!) as [String : AnyObject], success: {
-            sucess in
-            ActivityIndicator.shared.hide()
-            self.TripArray  = sucess.value(forKey: "body") as! [[String:Any]]
-            self.CollVw.reloadData()
-            
-        }, failure: {
-            fail in
-            ActivityIndicator.shared.hide()
-        })
+    
+    func postLectInProgress() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.course_in_progress_listing
+                , jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
+                    sucess in
+                    ActivityIndicator.shared.hide()
+                    if let progressObj = sucess["body"] as? [[String:Any]] {
+                        self.ProgressArray  = progressObj
+                        self.CollVw.reloadData()
+                    }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+    }
+    
+    func postTripListing() {
+         if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.TripListing, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                if let tripsObj = sucess["body"] as? [[String:Any]] {
+                    self.TripArray  = tripsObj
+                    self.CollVw.reloadData()
+                }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+        
     }
     @IBAction func ActnBack(_ sender: Any)
     {
@@ -116,8 +128,10 @@ class LockerVc: UIViewController{
     }
     @IBAction func ActnAddTrip(_ sender: Any)
     {
-        let vc = storyboard?.instantiateViewController(withIdentifier: "CreateTripVcViewController") as? CreateTripVcViewController
-        self.navigationController?.pushViewController(vc!, animated: false)
+        /*let vc = storyboard?.instantiateViewController(withIdentifier: "CreateTripVcViewController") as? CreateTripVcViewController
+        self.navigationController?.pushViewController(vc!, animated: false)*/
+        let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
+        self.navigationController?.pushViewController(vc!, animated: true)
     }
 
     func getDataFromUrl(url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
@@ -151,17 +165,18 @@ class LockerVc: UIViewController{
         vc?.GetDetailTrip = TripArray[indexPath]
         self.navigationController?.pushViewController(vc!, animated: false)
     }
-    func dateConvert(_ TimeStamp:String) -> String
-    {
+    func dateConvert(_ TimeStamp:String) -> String {
         let unixTimestamp = TimeStamp
-        let date = Date(timeIntervalSince1970: Double(unixTimestamp as! String)!)
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
-        dateFormatter.locale = NSLocale.current
-        dateFormatter.dateFormat = "MM/dd/yyyy"
-        let strDate = dateFormatter.string(from: date)
-        return strDate
-        
+        if let timeStamp = Double(unixTimestamp) {
+            let date = Date(timeIntervalSince1970: timeStamp)
+            let dateFormatter = DateFormatter()
+            dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
+            dateFormatter.locale = NSLocale.current
+            dateFormatter.dateFormat = "MM/dd/yyyy"
+            let strDate = dateFormatter.string(from: date)
+            return strDate
+        }
+        return ""
     }
     
 }
@@ -190,38 +205,38 @@ extension LockerVc : UICollectionViewDelegate,UICollectionViewDataSource,UIColle
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        if indexPath.section == 1
-        {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLocker", for: indexPath) as? CellLocker
-        let values = nameArray[indexPath.item]
-        let photo = values["course_image"] as? String
-            let unixTimestamp = values["created"] as? String
-            let date = Date(timeIntervalSince1970: Double(unixTimestamp as! String)!)
-            let dateFormatter = DateFormatter()
-            dateFormatter.timeZone = TimeZone(abbreviation: "GMT")
-            dateFormatter.locale = NSLocale.current
-            dateFormatter.dateFormat = "MM/dd/yyyy"
-            let strDate = dateFormatter.string(from: date)
-            cell?.LblDate.text = strDate
-            cell?.BtnCertificate.tag = indexPath.row
-        if (photo != "")
-        {
-            cell?.ImageVw.sd_setImage(with: URL(string: photo!), placeholderImage:#imageLiteral(resourceName: "Bed") )
-        }
-            cell?.TxtVw.text = (values["course_name"] as! String)
-            return cell!
+        if indexPath.section == 1 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLocker", for: indexPath) as? CellLocker
+                let values = nameArray[indexPath.item]
+                let photo = values["course_image"] as? String
+                let unixTimestamp = values["created"] as? String
+                if let timeStamp = unixTimestamp {
+                let startDate = dateConvert(timeStamp)
+                cell?.LblDate.text = startDate
+                }
+                cell?.BtnCertificate.tag = indexPath.row
+                if let photoObj = photo, !photoObj.isEmpty {
+                cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage:#imageLiteral(resourceName: "Bed") )
+                }
+                if let course_name = values["course_name"] as? String {
+                    cell?.TxtVw.text = course_name
+                }
+                return cell!
         }
         else if indexPath.section == 2
         {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLockerIP", for: indexPath) as? CellLockerIP
             let values = ProgressArray[indexPath.row]
             let photo = values["image"] as? String
-            cell?.LblCname.text = (values["name"] as! String)
-            cell?.TxtVw.text = (values["overview"] as! String)
+            if let name = values["name"] as? String {
+                 cell?.LblCname.text = name
+            }
+            if let value = values["overview"] as? String {
+                cell?.TxtVw.text = value
+            }
             
-            if (photo != "")
-            {
-                cell?.ImageVw.sd_setImage(with: URL(string: photo!), placeholderImage: UIImage(named: "Bed"))
+            if let photoObj = photo, !photoObj.isEmpty {
+                cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage: UIImage(named: "Bed"))
             }
             return cell!
         }else
@@ -230,11 +245,10 @@ extension LockerVc : UICollectionViewDelegate,UICollectionViewDataSource,UIColle
              let values = TripArray[indexPath.row]
             cell?.LblTripname.text = values["trip_name"] as? String
             cell?.LblNuCourses.text = values["total_course"] as? String
-            if values["trip_date"] as! String != "" || values["trip_end_date"] as? String != ""
-            {
-            let StartDate = dateConvert(values["trip_date"] as! String)
-            let EndDate = dateConvert(values["trip_end_date"] as! String)
-             cell?.LblDate.text = StartDate + " - " + EndDate
+            if let startDate = values["trip_date"] as? String, let endDate = values["trip_end_date"] as? String {
+                let StartDate = dateConvert(startDate)
+                let EndDate = dateConvert(endDate)
+                cell?.LblDate.text = StartDate + " - " + EndDate
             }
             
             return cell!

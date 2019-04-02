@@ -38,10 +38,14 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
       }
     
     func getHotelsNearBy() {
-         if let authKey = UserDefaults.standard.value(forKey: "userid") as? String {
-            let dic = ["user_id": authKey ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString()]
+         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
+            //let dic = ["user_id": userId ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString(), "onlycount": "1"]
+          // let dic = ["user_id": "196" ,"current_lat": "12.932979", "current_long": "77.612367", "onlycount": "1"]
+             let dic = ["user_id": "255" ,"current_lat": "12.932979", "current_long": "77.612367", "onlycount": "1"]
             ActivityIndicator.shared.show(self.view)
-            DataManager.postAPIWithParameters(urlString: API.getHotels, jsonString: dic as [String : AnyObject], success: { [weak self] sucess in
+            // let dic = ["client_id": "rest_api_client" ,"client_secret": "secret", "grant_type": "password", "username": "pizzaplanetama@hybris.com", "password": "12341234"]
+            //API.getHotels
+            DataManager.postAPIWithParameters(urlString:API.getHotels, jsonString: dic as [String : AnyObject], success: { [weak self] sucess in
                 ActivityIndicator.shared.hide()
                 print("Hotels near by: \n \(sucess)")
                 if let count = sucess.value(forKey: "count") as? Int {
@@ -61,7 +65,7 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
                         self?.MenuArray.append("Trip Tacker")
                         self?.MenuArray.append("CE Tracker")
                         
-                        //self?.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
+                       // self?.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
                         self?.imageArray.append(#imageLiteral(resourceName: "tripicon"))
                         self?.imageArray.append(#imageLiteral(resourceName: "trackerIcon"))
                         self?.imageArray.append(#imageLiteral(resourceName: "CEtracker"))
@@ -109,8 +113,7 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
         }, completion:nil)
     }
     
-    @IBAction func ActnBack(_ sender: Any)
-    {
+    @IBAction func ActnBack(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
     }
     
@@ -164,8 +167,14 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
                     ActivityIndicator.shared.hide()
             })
         }
-       
     }
+    
+//    func configureHotelData() {
+//        if let count = sucess.value(forKey: "count") as? Int {
+//            if count > 0 {
+//            }
+//        }
+//    }
 }
 
 extension HomeVc : UITableViewDelegate,UITableViewDataSource
@@ -201,14 +210,18 @@ extension HomeVc : UITableViewDelegate,UITableViewDataSource
             }  else if indexPath.row == 2 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
                 vc?.shouldShowCurrent = true
+                vc?.showTripsOnly = false
                 self.navigationController?.pushViewController(vc!, animated: true)
             } else if indexPath.row == 3 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
                 vc?.shouldShowCurrent = false
+                vc?.showTripsOnly = false
                 self.navigationController?.pushViewController(vc!, animated: true)
             } else if indexPath.row == 0 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "resortcevc") as? ResortceViewController
                 self.navigationController?.pushViewController(vc!, animated: true)
+//                let vc = storyboard?.instantiateViewController(withIdentifier: "FindLocationVc") as? FindLocationVc
+//                self.navigationController?.pushViewController(vc!, animated: true)
             }
         } else  if MenuArray.count == 3 {
             if indexPath.row == 0 {
@@ -217,10 +230,12 @@ extension HomeVc : UITableViewDelegate,UITableViewDataSource
             }  else if indexPath.row == 1 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
                 vc?.shouldShowCurrent = true
+                vc?.showTripsOnly = false
                 self.navigationController?.pushViewController(vc!, animated: true)
             } else if indexPath.row == 2 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController
                 vc?.shouldShowCurrent = false
+                vc?.showTripsOnly = false
                 self.navigationController?.pushViewController(vc!, animated: true)
             }
         }
