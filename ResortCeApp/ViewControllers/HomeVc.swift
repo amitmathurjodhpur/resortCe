@@ -92,8 +92,13 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     }
     
     func newUserCompleted() {
-       MenuArray.append("Plan A Trip")
-       imageArray.append(#imageLiteral(resourceName: "tripicon"))
+        MenuArray.append("Plan A Trip")
+        MenuArray.append("Trip Tacker")
+        MenuArray.append("CE Tracker")
+        
+        imageArray.append(#imageLiteral(resourceName: "trackerIcon"))
+        imageArray.append(#imageLiteral(resourceName: "CEtracker"))
+        imageArray.append(#imageLiteral(resourceName: "tripicon"))
         self.tableView.reloadData()
     }
     

@@ -187,16 +187,17 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
     //MARK: - SEARCH LOCATION ON MAP
     func searchBarBtnPressed(_ sender: Any) {
         let autocompleteController = GMSAutocompleteViewController()
-       autocompleteController.delegate = self
+        autocompleteController.delegate = self
         present(autocompleteController, animated: true, completion: nil)
     }
     
-    func didUpdateAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
+     func didUpdateAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
         // Turn the network activity indicator off.
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
         // Reload table data.
         searchDisplayController?.searchResultsTableView.reloadData()
     }
+    
     func didRequestAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
         // Turn the network activity indicator on.
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
