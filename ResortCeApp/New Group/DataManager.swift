@@ -14,20 +14,18 @@ class DataManager {
     //MARK: - POST METHOD WITH PARAMTERS ONLY -
     class func postAPIWithParameters(urlString:String,jsonString:[String: AnyObject] ,success: @escaping (AnyObject) -> Void,failure: @escaping(NSError)  -> Void) {
            if (NetworkReachabilityManager()?.isReachable)!{
+            print(jsonString)
              Alamofire.request(urlString, method: .post, parameters: jsonString).responseJSON {
                 response in
                 print("Response: \(response)")
                 switch response.result {
                 case .success:
                     ActivityIndicator.shared.hide()
-
-                    print(response)
-                    if (response.response?.statusCode == 200){
+                    if (response.response?.statusCode == 200) {
                         if let value = response.result.value {
                             success(value as AnyObject)
                         }
-                    } else if (response.response?.statusCode == 203)
-                    {
+                    } else if (response.response?.statusCode == 203) {
                         UserDefaults.standard.set("0", forKey: "auth_key")
                         UserDefaults.standard.set("0", forKey: AppKey.LoginStatus)
                         User.iswhichUser = "0"
@@ -36,15 +34,12 @@ class DataManager {
                         let navigationController = UINavigationController(rootViewController: vc)
                         navigationController.isNavigationBarHidden = true
                         UIApplication.shared.keyWindow?.rootViewController = navigationController
-                    }
-                  else  if (response.response?.statusCode == 403){
+                    } else  if (response.response?.statusCode == 403) {
                         let value = response.result.value as? [String:Any]
                         if let key = value!["message"] as? String{
                             showAlert(KAlertTitle, key)
                         }
-
-                    }
-                    else{
+                    } else {
                         let value = response.result.value as? [String:Any]
                         if let key = value!["message"] as? String{
                             showAlert(KAlertTitle, key)

@@ -35,7 +35,7 @@ class Lect1Detail: UIViewController {
     var CourseFee : NSDecimalNumber!
     var StringCourseFee = ""
     var DatahotelDict : [String:Any] = [:]
-   
+    var shouldShowBuyBtn: Bool = false
     @IBOutlet weak var LblHeading: UILabel!
     @IBOutlet weak var TxtVwDetails: UITextView!
     @IBOutlet weak var LectTitle: UILabel!
@@ -44,30 +44,31 @@ class Lect1Detail: UIViewController {
     @IBOutlet weak var credits: UILabel!
     @IBOutlet weak var BuyBtn: UIButton!
     @IBOutlet weak var RestoreBtn: UIButton!
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
       //  PKPaymentAuthorizationViewController.canMakePayments(usingNetworks: SupportedPaymentNetworks)
     }
-    @IBAction func restoreAction(_ sender: UIButton)
-    {
+    @IBAction func restoreAction(_ sender: UIButton) {
         SKPaymentQueue.default().add(self)
         SKPaymentQueue.default().restoreCompletedTransactions()
     }
-    override func viewWillAppear(_ animated: Bool)
-    {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         getOneCourseList()
     }
-    override func viewWillDisappear(_ animated: Bool)
-    {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
        // SKPaymentQueue.default().remove(self)
         
     }
-    override func viewDidAppear(_ animated: Bool)
-    {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if shouldShowBuyBtn {
+            self.BuyBtn.isHidden = false
+        } else {
+            self.BuyBtn.isHidden = true
+        }
+        
         //SKPaymentQueue.default().add(self)
     }
     func getOneCourseList() {
@@ -153,10 +154,15 @@ class Lect1Detail: UIViewController {
     }
     
     func setBuyBtn() {
-        if  self.buyBtnTYpe == "1" {
-            BuyBtn.setTitle("Purchased", for: .normal)
+        if shouldShowBuyBtn {
+            self.BuyBtn.isHidden = false
+            if  self.buyBtnTYpe == "1" {
+                BuyBtn.setTitle("Purchased", for: .normal)
+            } else {
+                BuyBtn.setTitle("Buy", for: .normal)
+            }
         } else {
-            BuyBtn.setTitle("Buy", for: .normal)
+            self.BuyBtn.isHidden = true
         }
     }
     

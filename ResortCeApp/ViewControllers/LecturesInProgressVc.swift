@@ -96,6 +96,7 @@ extension LecturesInProgressVc : UICollectionViewDelegate,UICollectionViewDataSo
             let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
             vc?.detail = lectId
             vc?.DatahotelDict = DatahotelDict
+            vc?.shouldShowBuyBtn = true
             self.navigationController?.pushViewController(vc!, animated: true)
         }
     }

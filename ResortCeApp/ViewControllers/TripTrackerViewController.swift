@@ -56,7 +56,6 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
              let dic = ["user_id": userId]
-           //let dic = ["user_id": "184"]
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getTrips , jsonString: dic as [String : AnyObject], success: {
                 success in
@@ -64,15 +63,15 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                 ActivityIndicator.shared.hide()
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
                     print(response.count)
-                    self.sectionNames = [ "Current Trips","In Progress Trips", "Completed Trips"]
+                    self.sectionNames = [ "Future Trips","In Progress Trips", "Completed Trips"]
                     for tripObj in response {
-                        if let trip = tripObj as Dictionary<String, AnyObject>?, let tripId = trip["id"] as? String, let tripName = trip["name"] as? String, let status = trip["status"] as? String, let tDate = trip["date"] as? String {
-                            let trip = Trip.init(tripeId: tripId, tripName: tripName, status: status, tripDate: tDate)
-                            if status == "1" {
+                        if let trip = tripObj as Dictionary<String, AnyObject>?, let tripId = trip["id"] as? String, let tripName = trip["name"] as? String, let status = trip["status"] as? Int, let tDate = trip["date"] as? String {
+                            let trip = Trip.init(tripeId: tripId, tripName: tripName, status: String(status), tripDate: tDate)
+                            if status == 1 {
                                 self.inProgressTrips.append(trip)
-                            } else if status == "0" {
+                            } else if status == 0 {
                                 self.currentTrips.append(trip)
-                            } else if status == "2" {
+                            } else if status == 2 {
                                 self.completedTrips.append(trip)
                             }
                         }
@@ -96,16 +95,13 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             ActivityIndicator.shared.show(self.view)
              let dic = ["user_id": userId]
-            //let dic = ["user_id": "196"]
-            // let dic = ["user_id": "184"]
-            
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getCourses , jsonString: dic as [String : AnyObject], success: {
                 success in
                 print(success)
                 ActivityIndicator.shared.hide()
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
-                    self.sectionNames = [ "In Progress Courses", "Completed Courses"]
+                    self.sectionNames = [ "Enrolled Courses", "Completed Courses"]
                     for courseObj in response {
                         if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String, let dt = course["date"] as? String {
                             let course = Course.init(courseId: courseId, courseName: courseName, status: status, courseDate: dt)
@@ -253,10 +249,21 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
         return UITableViewCell()
     }
     
-    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if shouldShowCurrent {
+            let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
+                vc?.isEditMode = true
+                if indexPath.section == 0 {
+                    vc?.currentTripId = currentTrips[indexPath.row].tripeId
+                    self.navigationController?.pushViewController(vc!, animated: true)
+                } else if indexPath.section == 1 {
+                    vc?.currentTripId = inProgressTrips[indexPath.row].tripeId
+                    self.navigationController?.pushViewController(vc!, animated: true)
+                } 
+        }
     }
-    
+   
     // MARK: - Expand / Collapse Methods
     
     @objc func sectionHeaderWasTouched(_ sender: UITapGestureRecognizer) {

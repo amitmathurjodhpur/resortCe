@@ -44,8 +44,8 @@ class Request: NSObject {
         return [AppKey.AuthorizationKey : authorization_key,AppKey.courseId:id,AppKey.type:type,AppKey.GroupId:GroupId,AppKey.HotelId:HotelId,AppKey.Hotelname:HotelName,AppKey.HotelAddress:hotelAddress,AppKey.HotelLatitude:hotelLat,AppKey.hotelLongitude:HotelLongi,AppKey.HotelWebsite:Hotelwebsite,AppKey.HotelPhonenumber:hotelphone]
     }
     
-    static func GetNearGroups(_ authorization_key: String,_ lat:String,_ long:String) -> [String: Any] {
-        return [AppKey.AuthorizationKey : authorization_key,AppKey.latitude:lat,AppKey.longitude:long]
+    static func GetNearGroups(_ authorization_key: String,_ lat:String,_ long:String,_ distance:String) -> [String: Any] {
+        return [AppKey.AuthorizationKey : authorization_key,AppKey.latitude:lat,AppKey.longitude:long, AppKey.distance:distance]
     }
     
     static func OneGroupList(_ authorization_key: String,_ GroupId:String) -> [String: Any]

@@ -84,6 +84,7 @@ extension NotificationVc: UITableViewDelegate,UITableViewDataSource
         let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
         let courseId = values["course_id"] as! String
         vc?.detail = courseId
+        vc?.shouldShowBuyBtn = true
         self.navigationController?.pushViewController(vc!, animated: true)
         
     }

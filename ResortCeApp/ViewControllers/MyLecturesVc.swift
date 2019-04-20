@@ -88,6 +88,7 @@ extension MyLecturesVc : UICollectionViewDelegate,UICollectionViewDataSource,UIC
         PostLectId = values["course_id"] as! String
         let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
         vc?.detail = PostLectId
+        vc?.shouldShowBuyBtn = true
         self.navigationController?.pushViewController(vc!, animated: true)
     }
 }

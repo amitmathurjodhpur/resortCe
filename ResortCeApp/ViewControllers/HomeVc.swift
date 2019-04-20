@@ -40,10 +40,8 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     func getHotelsNearBy() {
          if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             //let dic = ["user_id": userId ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString(), "onlycount": "1"]
-          // let dic = ["user_id": "196" ,"current_lat": "12.932979", "current_long": "77.612367", "onlycount": "1"]
              let dic = ["user_id": "255" ,"current_lat": "12.932979", "current_long": "77.612367", "onlycount": "1"]
             ActivityIndicator.shared.show(self.view)
-            // let dic = ["client_id": "rest_api_client" ,"client_secret": "secret", "grant_type": "password", "username": "pizzaplanetama@hybris.com", "password": "12341234"]
             //API.getHotels
             DataManager.postAPIWithParameters(urlString:API.getHotels, jsonString: dic as [String : AnyObject], success: { [weak self] sucess in
                 ActivityIndicator.shared.hide()
@@ -209,6 +207,7 @@ extension HomeVc : UITableViewDelegate,UITableViewDataSource
         if MenuArray.count == 4 {
             if indexPath.row == 1 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
+                vc?.isEditMode = false
                 self.navigationController?.pushViewController(vc!, animated: true)
                /* let vc = storyboard?.instantiateViewController(withIdentifier: "LecturesInProgressVc") as? LecturesInProgressVc
                 self.navigationController?.pushViewController(vc!, animated: true)*/
@@ -231,6 +230,7 @@ extension HomeVc : UITableViewDelegate,UITableViewDataSource
         } else  if MenuArray.count == 3 {
             if indexPath.row == 0 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
+                vc?.isEditMode = false
                 self.navigationController?.pushViewController(vc!, animated: true)
             }  else if indexPath.row == 1 {
                 let vc = storyboard?.instantiateViewController(withIdentifier: "triptrackervc") as? TripTrackerViewController

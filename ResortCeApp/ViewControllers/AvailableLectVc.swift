@@ -61,7 +61,7 @@ class AvailableLectVc: UIViewController {
     var CourseFee : NSDecimalNumber!
     var StringCourseFee = ""
     @IBOutlet weak var tblVwAvailLect: UITableView!
-    
+    var shouldShowBuyBtn: Bool = false
     override func viewDidLoad() {
         super.viewDidLoad()
       PKPaymentAuthorizationViewController.canMakePayments(usingNetworks: SupportedPaymentNetworks)
@@ -81,13 +81,17 @@ class AvailableLectVc: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        SKPaymentQueue.default().remove(self)
+         if self.shouldShowBuyBtn {
+            SKPaymentQueue.default().remove(self)
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        SKPaymentQueue.default().add(self)
-        SKPaymentQueue.default().restoreCompletedTransactions()
+        if self.shouldShowBuyBtn {
+            SKPaymentQueue.default().add(self)
+            SKPaymentQueue.default().restoreCompletedTransactions()
+        }
     }
    
     func getOneCourseList() {
@@ -218,6 +222,7 @@ class AvailableLectVc: UIViewController {
         vc.groupid = getGroupId
         vc.DatahotelDict = DatahotelDict
         vc.StringCourseFee = StringCourseFee
+        vc.shouldShowBuyBtn = shouldShowBuyBtn
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -269,20 +274,36 @@ extension AvailableLectVc : UITableViewDelegate,UITableViewDataSource {
                // cell?.BuyBtn.setTitle("No Product", for: .normal)
            // }
         }
+        
+        if self.shouldShowBuyBtn {
+            cell?.BuyBtn.isHidden = false
+        } else {
+            cell?.BuyBtn.isHidden = true
+        }
         return cell!
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       let values = nameArray[indexPath.row]
-       buyBtnTYpe = values["buy"] as! String
-        if buyBtnTYpe == "1" {
-         PostReview = (values["id"] as? String)!
-         let vc = storyboard?.instantiateViewController(withIdentifier: "LectReviewVc") as! LectReviewVc
-         vc.getReview = PostReview
-         self.navigationController?.pushViewController(vc, animated: true)
-        } else {
-            UIAlertController.show(self, "Message", "Buy Course First")
+        let values = nameArray[indexPath.row]
+         if self.shouldShowBuyBtn {
+            if let val = values["buy"] as? String {
+                buyBtnTYpe = val
+                if buyBtnTYpe == "1" {
+                    PostReview = values["id"] as? String ?? ""
+                    let vc = storyboard?.instantiateViewController(withIdentifier: "LectReviewVc") as! LectReviewVc
+                    vc.getReview = PostReview
+                    self.navigationController?.pushViewController(vc, animated: true)
+                } else {
+                    UIAlertController.show(self, "Message", "Buy Course First")
+                }
+            }
+         } else {
+           /* PostReview = values["id"] as? String ?? ""
+            let vc = storyboard?.instantiateViewController(withIdentifier: "LectReviewVc") as! LectReviewVc
+            vc.getReview = PostReview
+            self.navigationController?.pushViewController(vc, animated: true)*/
         }
+       
     }
 }
 extension AvailableLectVc: SKProductsRequestDelegate,SKPaymentTransactionObserver{

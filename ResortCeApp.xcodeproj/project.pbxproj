@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		22059ECB2258C7F100D3A47B /* ExpenceTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22059EC92258C7F100D3A47B /* ExpenceTableViewCell.swift */; };
+		22059ECC2258C7F100D3A47B /* ExpenceTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22059ECA2258C7F100D3A47B /* ExpenceTableViewCell.xib */; };
+		220BD0EB225A075F0024AF81 /* ReceiptViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220BD0EA225A075F0024AF81 /* ReceiptViewController.swift */; };
 		222009FF21EAF838006DA5B8 /* PlanView+AddExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222009FE21EAF838006DA5B8 /* PlanView+AddExpense.swift */; };
 		22200A0121EB0C80006DA5B8 /* TripTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0021EB0C80006DA5B8 /* TripTrackerViewController.swift */; };
 		22200A0321EB12B9006DA5B8 /* TripTrackCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22200A0221EB12B9006DA5B8 /* TripTrackCell.swift */; };
@@ -82,6 +85,9 @@
 
 /* Begin PBXFileReference section */
 		0D469967DA4C7EFC65B35604 /* Pods-ResortCeApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ResortCeApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ResortCeApp/Pods-ResortCeApp.debug.xcconfig"; sourceTree = "<group>"; };
+		22059EC92258C7F100D3A47B /* ExpenceTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenceTableViewCell.swift; sourceTree = "<group>"; };
+		22059ECA2258C7F100D3A47B /* ExpenceTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ExpenceTableViewCell.xib; sourceTree = "<group>"; };
+		220BD0EA225A075F0024AF81 /* ReceiptViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptViewController.swift; sourceTree = "<group>"; };
 		222009FE21EAF838006DA5B8 /* PlanView+AddExpense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlanView+AddExpense.swift"; sourceTree = "<group>"; };
 		22200A0021EB0C80006DA5B8 /* TripTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTrackerViewController.swift; sourceTree = "<group>"; };
 		22200A0221EB12B9006DA5B8 /* TripTrackCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTrackCell.swift; sourceTree = "<group>"; };
@@ -315,6 +321,9 @@
 				2240B3882205997600AA8FC5 /* SignUpVC.swift */,
 				22A82A2B2208A60E0088158E /* Trip+CourseObj.swift */,
 				2232F8FE2222989A00242881 /* HotelListViewController.swift */,
+				22059EC92258C7F100D3A47B /* ExpenceTableViewCell.swift */,
+				22059ECA2258C7F100D3A47B /* ExpenceTableViewCell.xib */,
+				220BD0EA225A075F0024AF81 /* ReceiptViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -403,6 +412,7 @@
 			files = (
 				439724C2203196290055D4B6 /* LaunchScreen.storyboard in Resources */,
 				438B989C20A1C5E700858C89 /* Main.storyboard in Resources */,
+				22059ECC2258C7F100D3A47B /* ExpenceTableViewCell.xib in Resources */,
 				439724BF203196290055D4B6 /* Assets.xcassets in Resources */,
 				43640A4E2099C02700BA036C /* GoogleService-Info.plist in Resources */,
 				436A695F203DAAE30071DC2A /* credentials.plist in Resources */,
@@ -519,6 +529,7 @@
 				4315A6422032D49700FCD23E /* MyLecturesVc.swift in Sources */,
 				4301875220AAC0C70035C5AB /* ReportVc.swift in Sources */,
 				2232F8FF2222989A00242881 /* HotelListViewController.swift in Sources */,
+				22059ECB2258C7F100D3A47B /* ExpenceTableViewCell.swift in Sources */,
 				439B82152063B09F0058B18C /* LectReviewVc3.swift in Sources */,
 				227B838121E9F4AF0097AB32 /* PlanTripViewController.swift in Sources */,
 				436A6957203D754F0071DC2A /* Utilities.swift in Sources */,
@@ -566,6 +577,7 @@
 				22200A0521EB2B3D006DA5B8 /* ResortceViewController.swift in Sources */,
 				222009FF21EAF838006DA5B8 /* PlanView+AddExpense.swift in Sources */,
 				4315A6462032D4D800FCD23E /* LockerVc.swift in Sources */,
+				220BD0EB225A075F0024AF81 /* ReceiptViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

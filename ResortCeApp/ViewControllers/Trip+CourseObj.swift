@@ -36,6 +36,24 @@ class Trip {
     }
 }
 
+class Expense {
+    var expenseId: String = ""
+    var expenseName: String = ""
+    var expenseType: String = ""
+    var expenseAmount: String = ""
+    var expenseDate: String = ""
+    var receiptPath: String = ""
+    
+    init(expenseId: String, expenseName: String, expenseType: String, expenseAmount: String, expenseDate: String, receiptPath: String) {
+        self.expenseName = expenseName
+        self.expenseId = expenseId
+        self.expenseType = expenseType
+        self.expenseAmount = expenseAmount
+        self.expenseDate = expenseDate
+        self.receiptPath = receiptPath
+    }
+}
+
 class Hotel {
     var hotelId: String = ""
     var hotelName: String = ""
@@ -57,3 +75,24 @@ class Hotel {
         self.coursesInHotel = coursesInHotel
     }
 }
+    class GroupLecture {
+        var groupId: String = ""
+        var groupName: String = ""
+        var groupAddress: String = ""
+        var groupLat: String = ""
+        var groupLong: String = ""
+        var groupDate: String = ""
+        var groupImage: String = ""
+        var groupDesc: String = ""
+        
+        init(groupId: String, groupName: String, groupAddress: String, groupLat: String, groupLong: String, groupDate: String, groupImage: String, groupDesc: String) {
+            self.groupId = groupId
+            self.groupName = groupName
+            self.groupAddress = groupAddress
+            self.groupLat = groupLat
+            self.groupLong = groupLong
+            self.groupDate = groupDate
+            self.groupImage = groupImage
+            self.groupDesc = groupDesc
+        }
+    }

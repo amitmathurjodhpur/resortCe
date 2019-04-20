@@ -30,6 +30,9 @@ public struct API {
     public static let getTrips              =           newbaseURL+"trips.php"
     public static let addCourse              =           newbaseURL+"addCourse.php"
     public static let getHotels              =           newbaseURL+"hotels.php"
+    public static let getTripDeatils              =           newbaseURL+"trip_details.php"
+    public static let editTrip              =           newbaseURL+"edit-trip.php"
+    public static let editExpense              =           newbaseURL+"editExpense.php"
 
     public static let userProfileDetail       =    userProfileURL+"user_profile_details"
     public static let forgetPassword          =           baseURL+"forgot_password"
@@ -46,11 +49,11 @@ public struct API {
     public static let course_content_listing    =      newAPIURL+"course_content_listing"
     public static let logout                       = newbaseURL+"logout.php"
     public static let profession_listing =          newAPIURL+"profession_listing"
-    public static let getnearbygroups =             baseURL+"get_near_by_groups"
-    public static let oneGroupList =                baseURL+"one_group_list"
-    public static let subcategory_listing =          baseURL+"subcategory_listing"
-    public static let subcategory_course_listing =   baseURL+"subcategory_course_listing"
-    public static let completedCourse =              baseURL+"completed_course"
+    public static let getnearbygroups =             newAPIURL+"get_near_by_groups"
+    public static let oneGroupList =                newAPIURL+"one_group_list"
+    public static let subcategory_listing =          newAPIURL+"subcategory_listing"
+    public static let subcategory_course_listing =   newAPIURL+"subcategory_course_listing"
+    public static let completedCourse =              newAPIURL+"completed_course"
     public static let LockerCourseListing =         newAPIURL+"locker_course_listing"
     public static let total_credits =         baseURL+"total_credits"
     public static let total_notifications =         newAPIURL+"total_notifications"
@@ -137,16 +140,7 @@ public struct AppKey {
     public static let license_number             = "license_number"
     public static let next_renewal_date          = "next_renewal_date"
     public static let renewal_cycle              = "renewal_cycle"
-    
-    
-   
-    
-    
-    
-    
-    
-    
-    
+    public static let distance              = "distance"
     
     public static let tripname    = "trip_name"
     public static let tripdate    = "trip_date"

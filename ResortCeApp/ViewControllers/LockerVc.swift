@@ -39,8 +39,8 @@ class LockerVc: UIViewController{
     var ProgressArray : [[String:Any]] = []
     var TripArray : [[String:Any]] = []
     @IBOutlet weak var CollVw: UICollectionView!
-    override func viewDidLoad()
-    {
+    
+    override func viewDidLoad() {
         super.viewDidLoad()
         postLectInProgress()
        PostLockerList()
@@ -130,8 +130,10 @@ class LockerVc: UIViewController{
     {
         /*let vc = storyboard?.instantiateViewController(withIdentifier: "CreateTripVcViewController") as? CreateTripVcViewController
         self.navigationController?.pushViewController(vc!, animated: false)*/
-        let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController
-        self.navigationController?.pushViewController(vc!, animated: true)
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "plantripvc") as? PlanTripViewController {
+            vc.isEditMode = false
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
 
     func getDataFromUrl(url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
@@ -355,6 +357,7 @@ extension LockerVc : UICollectionViewDelegate,UICollectionViewDataSource,UIColle
             let  PostLectId = values["id"] as! String
             let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
             vc?.detail = PostLectId
+            vc?.shouldShowBuyBtn = true
             self.navigationController?.pushViewController(vc!, animated: true)
             let photo = values["image"] as? String
             if photo != ""
