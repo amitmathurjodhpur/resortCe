@@ -7,6 +7,10 @@
 //
 
 import UIKit
+
+protocol ResetTripDelegate: class {
+    func resetTripData()
+}
 class CollCellLectType: UICollectionViewCell
 {
     @IBOutlet weak var LblName: UILabel!
@@ -32,7 +36,9 @@ class LecturesAvailableVc: UIViewController {
     var nameArray : [[String:Any]] = []
     var SubCategoryId = ""
     var GethotelDict : [String:Any] = [:]
-    
+    var shouldShowBuyBtn: Bool = false
+    weak var resetTripDelegate: ResetTripDelegate?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         print(GethotelDict)
@@ -53,6 +59,9 @@ class LecturesAvailableVc: UIViewController {
     }
     
     @IBAction func ActnBack(_ sender: Any) {
+        if self.resetTripDelegate != nil {
+            self.resetTripDelegate?.resetTripData()
+        }
         self.navigationController?.popViewController(animated: true)
     }
     
@@ -83,7 +92,8 @@ class LecturesAvailableVc: UIViewController {
     func PostsubCategoryist() { //list of type of courses in one group
         if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
             ActivityIndicator.shared.show(self.view)
-            DataManager.postAPIWithParameters(urlString: API.subcategory_listing, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
+            let dataDict = ["auth_key": authKey, "group_id": getGroupId]
+            DataManager.postAPIWithParameters(urlString: API.subcategory_listing, jsonString: dataDict as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()
                 print(sucess)
@@ -101,7 +111,8 @@ class LecturesAvailableVc: UIViewController {
     func PostsubCategoryCourse() { //list of all courses under one type
          if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
             ActivityIndicator.shared.show(self.view)
-            DataManager.postAPIWithParameters(urlString: API.subcategory_course_listing, jsonString: Request.SubCategoryCourseListing(authKey, SubCategoryId) as [String : AnyObject] , success: {
+            let dataDict = ["auth_key": authKey, "group_id": getGroupId, "subcategory_id": SubCategoryId]
+            DataManager.postAPIWithParameters(urlString: API.subcategory_course_listing, jsonString: dataDict as [String : AnyObject] , success: {
                 sucess in
                 ActivityIndicator.shared.hide()
                 print(sucess)
@@ -165,7 +176,7 @@ extension LecturesAvailableVc : UICollectionViewDelegate,UICollectionViewDataSou
             vc?.DatahotelDict = GethotelDict
             vc?.getGroupId = getGroupId
             vc?.detail = PostCourseId
-            vc?.shouldShowBuyBtn = false
+            vc?.shouldShowBuyBtn = self.shouldShowBuyBtn
             self.navigationController?.pushViewController(vc!, animated: true)
         }
         if collectionView == CollVwLectType {

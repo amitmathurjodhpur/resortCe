@@ -11,29 +11,31 @@ import CoreLocation
 
 class HotelListViewController: UIViewController, UITableViewDelegate,UITableViewDataSource, CLLocationManagerDelegate {
     @IBOutlet weak var courseTableView: UITableView!
-    var hotelsArr: [Hotel] = []
+    //var hotelsArr: [Hotel] = []
     var userCurrentLat = 0.0
     var userCurrentLong = 0.0
     var locationManager = CLLocationManager()
+    var groupArr: [GroupLecture] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let backButton = UIBarButtonItem()
         backButton.title = "Back"
         self.navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
-         self.title = "Resortcee"
-        getCurrentLocation()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            self.getHotelsNearBy()
-        }
+        self.title = "Resortcee"
+        getNearByGroups()
+//        getCurrentLocation()
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//            self.getHotelsNearBy()
+//        }
     }
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.isNavigationBarHidden  = false
     }
-    func getHotelsNearBy() {
+   /* func getHotelsNearBy() {
         if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
-            //let dic = ["user_id": userId ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString(), "onlycount": "0"]
-            let dic = ["user_id": "255" ,"current_lat": "12.932979", "current_long": "77.612367", "onlycount": "0"]
+            let dic = ["user_id": userId ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString(), "onlycount": "0"]
+            //let dic = ["user_id": "255" ,"current_lat": "12.932979", "current_long": "77.612367", "onlycount": "0"]
             ActivityIndicator.shared.show(self.view)
             DataManager.postAPIWithParameters(urlString: API.getHotels, jsonString: dic as [String : AnyObject], success: { [weak self] sucess in
                 ActivityIndicator.shared.hide()
@@ -53,10 +55,33 @@ class HotelListViewController: UIViewController, UITableViewDelegate,UITableView
                     ActivityIndicator.shared.hide()
             })
         }
+    }*/
+    func getNearByGroups() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+             let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            DataManager.postAPIWithParameters(urlString: API.getnearbygroups, jsonString: Request.GetNearGroups(authKey, appDelegate.currentHotel?.hotelLat ?? "0.0", appDelegate.currentHotel?.hotelLong ?? "0.0", "1000") as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                if let groups = sucess["body"] as? [[String:Any]], groups.count > 0 {
+                    for groupObj in groups {
+                        if let course = groupObj as Dictionary<String, AnyObject>?, let groupId = course["id"] as? String, let groupName = course["name"] as? String, let groupAddress = course["address"] as? String, let dt = course["date"] as? String, let groupLat = course["latitude"] as? String, let groupLong = course["longitude"] as? String, let groupImage = course["image"] as? String, let groupDesc = course["description"] as? String {
+                            let course = GroupLecture.init(groupId: groupId, groupName: groupName, groupAddress: groupAddress, groupLat: groupLat, groupLong: groupLong, groupDate: dt, groupImage: groupImage, groupDesc: groupDesc)
+                            self.groupArr.append(course)
+                        }
+                    }
+                    DispatchQueue.main.async {
+                        self.courseTableView.reloadData()
+                    }
+                }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
     }
     
-    func parseData(hotelData: [Dictionary<String, Any>]) {
-       
+   /* func parseData(hotelData: [Dictionary<String, Any>]) {
         for hotelObj in hotelData {
             if let hotel = hotelObj as Dictionary<String, AnyObject>?, let hotelId = hotel["hotel_Id"] as? String, let hotelName = hotel["hotel_name"] as? String, let hotelAddress = hotel["hotel_address"] as? String, let hotelLat = hotel["hotel_latitude"] as? String, let hotelLong = hotel["hotel_longitude"] as? String, let hotelPhoneNo = hotel["hotel_phone"] as? String, let hotelWebsite = hotel["hotel_website"] as? String, let courses = hotel["courses"] as? [Dictionary<String, Any>] {
                  var tmpCourseArr: [Course] = []
@@ -75,20 +100,29 @@ class HotelListViewController: UIViewController, UITableViewDelegate,UITableView
             self.courseTableView.reloadData()
         }
         print(self.hotelsArr)
-    }
+    }*/
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return hotelsArr.count
-    }
+//    func numberOfSections(in tableView: UITableView) -> Int {
+//        return hotelsArr.count
+//    }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return hotelsArr[section].coursesInHotel.count
+        return groupArr.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "coursecell") {
+        /*if let cell = tableView.dequeueReusableCell(withIdentifier: "coursecell") {
             cell.textLabel?.text = hotelsArr[indexPath.section].coursesInHotel[indexPath.row].courseName
             cell.textLabel?.numberOfLines = 0
             cell.textLabel?.lineBreakMode = .byWordWrapping
+            return cell
+        }*/
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "groupcell") {
+            cell.textLabel?.text = groupArr[indexPath.row].groupName
+            cell.detailTextLabel?.text = groupArr[indexPath.row].groupDesc
+            cell.detailTextLabel?.numberOfLines = 0
+            cell.detailTextLabel?.lineBreakMode = .byWordWrapping
+            cell.imageView?.sd_setImage(with: URL(string: groupArr[indexPath.row].groupImage), placeholderImage: UIImage(named: "Bed"))
+            
             return cell
         }
         return UITableViewCell()
@@ -96,9 +130,20 @@ class HotelListViewController: UIViewController, UITableViewDelegate,UITableView
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LecturesAvailableVc") as? LecturesAvailableVc {
+             let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            if let hotelObj = appDelegate.currentHotel {
+                let dataDictHotel: [String:Any] = ["HotelId":hotelObj.hotelId,"HotelName": hotelObj.hotelName,"HotelAddress":hotelObj.hotelName,"HotelLatitude": hotelObj.hotelLat ,"HotelLongitude":hotelObj.hotelLong, "HotelPhone": hotelObj.hotelPhoneNo, "HotelWebsite": hotelObj.hotelWebsite]
+                vc.GethotelDict = dataDictHotel
+                vc.getGroupId = self.groupArr[indexPath.row].groupId
+                vc.shouldShowBuyBtn = true
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+           
+        }
     }
     
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat{
+   /* func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat{
         return 0
     }
     
@@ -134,7 +179,7 @@ class HotelListViewController: UIViewController, UITableViewDelegate,UITableView
     }
     @objc func buttonClicked(sender: UIButton) {
         print("Button Clicked: \(sender.tag)")
-        let vc = storyboard?.instantiateViewController(withIdentifier: "LecturesInProgressVc") as? LecturesInProgressVc
+       /* let vc = storyboard?.instantiateViewController(withIdentifier: "LecturesInProgressVc") as? LecturesInProgressVc
        
         let hotelObj = hotelsArr[sender.tag]
         var tmpDatahotelDict : [String:Any] = [:]
@@ -147,7 +192,22 @@ class HotelListViewController: UIViewController, UITableViewDelegate,UITableView
         tmpDatahotelDict["HotelId"] = hotelObj.hotelId
         
         vc?.DatahotelDict = tmpDatahotelDict
-        self.navigationController?.pushViewController(vc!, animated: true)
+        self.navigationController?.pushViewController(vc!, animated: true)*/
+        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LecturesAvailableVc") as? LecturesAvailableVc {
+            let hotelObj = hotelsArr[sender.tag]
+            var tmpDatahotelDict : [String:Any] = [:]
+            tmpDatahotelDict["HotelName"] = hotelObj.hotelName
+            tmpDatahotelDict["HotelAddress"] = hotelObj.hotelAddress
+            tmpDatahotelDict["HotelLatitude"] = hotelObj.hotelLat
+            tmpDatahotelDict["HotelLongitude"] = hotelObj.hotelLong
+            tmpDatahotelDict["HotelWebsite"] = hotelObj.hotelWebsite
+            tmpDatahotelDict["HotelPhone"] = hotelObj.hotelPhoneNo
+            tmpDatahotelDict["HotelId"] = hotelObj.hotelId
+            let dataDictHotel: [String:Any] = ["HotelId":hotelObj.hotelId,"HotelName": hotelObj.hotelName,"HotelAddress":hotelObj.hotelAddress,"HotelLatitude": hotelObj.hotelLat ,"HotelLongitude":hotelObj.hotelLong, "HotelPhone": hotelObj.hotelPhoneNo, "HotelWebsite": hotelObj.hotelWebsite]
+            vc.GethotelDict = dataDictHotel
+            vc.getGroupId = "" //self.groupArr[indexPath.row].groupId
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     //MARK: - Location Manager
     func getCurrentLocation() {
@@ -204,6 +264,7 @@ class HotelListViewController: UIViewController, UITableViewDelegate,UITableView
             alpha: CGFloat(1.0)
         )
     }
+ */
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

@@ -81,7 +81,7 @@ class FindLocationVc: UIViewController {
     func addgroups(lati:Double,longi:Double,DataDict:[String:Any])
     {
         ActivityIndicator.shared.show(self.view)
-        DataManager.postAPIWithParameters(urlString: API.getnearbygroups, jsonString: Request.GetNearGroups((UserDefaults.standard.value(forKey: "authKey") as? String)!, String(lati), String(longi), "50") as [String : AnyObject], success: {
+        DataManager.postAPIWithParameters(urlString: API.getnearbygroups, jsonString: Request.GetNearGroups((UserDefaults.standard.value(forKey: "authKey") as? String)!, String(lati), String(longi), "1000") as [String : AnyObject], success: {
             sucess in
             ActivityIndicator.shared.hide()
             self.nameArray = (sucess["body"] as? [[String:Any]])!

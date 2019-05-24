@@ -8,6 +8,8 @@
 
 import Foundation
 import UIKit
+import CoreLocation
+
 extension Data {
     var html2AttributedString: NSAttributedString? {
         do {
@@ -85,3 +87,23 @@ extension  UIView{
     
 }
 
+extension UserDefaults {
+   // usage example:
+    //Store: UserDefaults.standard.set(location:myLocation, forKey:"myLocation")
+    //Retreive: UserDefaults.standad.location(forKey:"myLocation")
+    
+    func set(location:CLLocation, forKey key: String) {
+        let locationLat = NSNumber(value:location.coordinate.latitude)
+        let locationLon = NSNumber(value:location.coordinate.longitude)
+        self.set(["lat": locationLat, "lon": locationLon], forKey:key)
+    }
+    
+    func location(forKey key: String) -> CLLocation? {
+        if let locationDictionary = self.object(forKey: key) as? Dictionary<String,NSNumber> {
+            let locationLat = locationDictionary["lat"]?.doubleValue ?? 0.0
+            let locationLon = locationDictionary["lon"]?.doubleValue ?? 0.0
+            return CLLocation(latitude: locationLat, longitude: locationLon)
+        }
+        return nil
+    }
+}

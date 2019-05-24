@@ -41,7 +41,7 @@ class TripReportVc: UIViewController {
         print(GetReportTrip)
         PlaceholderArray[0] = GetReportTrip["trip_name"] as? String ?? ""
         PlaceholderArray[1] = GetReportTrip["total_course"] as? String ?? ""
-        PlaceholderArray[2] = dateConvert(GetReportTrip["trip_date"] as? String ?? "")
+        PlaceholderArray[2] = GetReportTrip["trip_date"] as? String ?? ""
         ExpenseArray = GetReportTrip["expensis"] as? [[String : Any]] ?? []
         CoursesArray = GetReportTrip["courses"] as? [[String : Any]] ?? []
     }
@@ -159,140 +159,109 @@ extension TripReportVc:UITableViewDelegate,UITableViewDataSource {
         }
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
-    {
-        if indexPath.section == 0
-        {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.section == 0 {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CellReport", for: indexPath) as? CellReport
         cell?.LblTripName.text = GetReportTrip["trip_name"] as? String
-          
-        cell?.LblTripDate.text = dateConvert(GetReportTrip["trip_date"] as? String ?? "") + " - " + dateConvert(GetReportTrip["trip_end_date"] as? String ?? "")
-            
+        cell?.LblTripDate.text = (GetReportTrip["trip_date"] as? String ?? "") + " - " + (GetReportTrip["end_date"] as? String ?? "")
         return cell!
-        }else if indexPath.section == 1
-        {
+        } else if indexPath.section == 1 {
              let cell = tableView.dequeueReusableCell(withIdentifier: "CellCoursesReport", for: indexPath) as? CellCoursesReport
             let values = CoursesArray[indexPath.row]
             cell?.lblCourseName.text = values["name"] as? String
             cell?.LblCousreDate.text = dateConvert((values["created"] as? String)!)
             return cell!
-        }
-        else
-        {
+        } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "CellReportImage", for: indexPath) as? CellReportImage
             let values = ExpenseArray[indexPath.row]
             cell?.LblExpenseName.text = values["expensis_name"] as? String
-            cell?.LblExpenseDate.text = dateConvert(values["expensis_date"] as! String)
+            cell?.LblExpenseDate.text = values["expensis_date"] as? String ?? ""
             cell?.LblExpenseType.text = values["expensis_type"] as? String
             cell?.LblExpenseAmount.text = "$" + (values["expensis_amount"] as? String)!
-            let image = values["image"] as? String
-            if image != nil{
-                cell?.imagevw.sd_setImage(with: URL(string: image!), placeholderImage: #imageLiteral(resourceName: "Bed"))
+            
+            if let image = values["expensis_image"] as? String {
+                cell?.imagevw.sd_setImage(with: URL(string: image), placeholderImage: #imageLiteral(resourceName: "Bed"))
             }
             return cell!
         }
         
     }
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat
-    {
-        if indexPath.section == 2
-        {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.section == 2 {
             return 430
-        }else
-        {
+        } else {
             return 100
         }
     }
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat
-    {
-        if section == 0
-        {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        if section == 0 {
             return 0
-        }else
-        {
-        return 40
+        } else {
+            return 40
         }
     }
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView?
-    {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let header = UILabel()
         header.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 40)
         header.backgroundColor = UIColor.white
         header.textColor = UIColor.black
-        if section == 0
-        {
+        if section == 0 {
             header.text = ""
-        }else if section == 1
-        {
+        } else if section == 1 {
             header.text = "Total Courses Completed"
-        }else
-        {
+        } else {
             header.text = "Trip Expenses"
         }
         return header
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
-    {
-        if indexPath.section == 2
-        {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == 2 {
             let alert:UIAlertController=UIAlertController(title: "Choose Option", message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
-            let EditAction = UIAlertAction(title: "Edit Expense", style: UIAlertActionStyle.default)
-            {
+            let EditAction = UIAlertAction(title: "Edit Expense", style: UIAlertActionStyle.default) {
                 UIAlertAction in
                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditTrip") as? EditTrip
                 vc?.GetDataTrip = self.ExpenseArray[indexPath.row]
                 self.navigationController?.pushViewController(vc!, animated: true)
             }
-            let DeleteAction = UIAlertAction(title: "Delete Expense", style: UIAlertActionStyle.default)
-            {
+            let DeleteAction = UIAlertAction(title: "Delete Expense", style: UIAlertActionStyle.default) {
                 UIAlertAction in
                 let Values = self.ExpenseArray[indexPath.row]
                 let expenseId = Values["id"] as! String
                 self.DeleteExpense(expenseId)
             }
-            let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel)
-            {
+            let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel) {
                 UIAlertAction in
             }
             alert.addAction(EditAction)
             alert.addAction(DeleteAction)
             alert.addAction(cancelAction)
             self.present(alert, animated: true, completion: nil)
-        }else if indexPath.section == 0
-        {
+        } else if indexPath.section == 0  {
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditTrip") as? EditTrip
             vc?.tripId = self.GetReportTrip["id"] as! String
             self.navigationController?.pushViewController(vc!, animated: true)
         }
-        
     }
     
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
-    {
-        if indexPath.section == 0
-        {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool  {
+        if indexPath.section == 0 {
             return false
-        }else
-        {
+        } else {
             return false
         }
     }
+    
     func tableView(_ tableView: UITableView, editActionsForRowAt: IndexPath) -> [UITableViewRowAction]? {
-        
-        if editActionsForRowAt.section == 2
-        {
-        let Edit = UITableViewRowAction(style: .normal, title: "Edit") { action, index in
-            
+        if editActionsForRowAt.section == 2 {
+            let Edit = UITableViewRowAction(style: .normal, title: "Edit") { action, index in
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditTrip") as? EditTrip
             vc?.GetDataTrip = self.ExpenseArray[editActionsForRowAt.row]
             self.navigationController?.pushViewController(vc!, animated: true)
         }
         Edit.backgroundColor = UIColor.gray
         return [Edit]
-        }else
-        {
+        } else {
             let AddNew = UITableViewRowAction(style: .normal, title: "Add New Expenses") { action, index in
-                
                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditTrip") as? EditTrip
                 vc?.tripId = self.GetReportTrip["id"] as! String
                 self.navigationController?.pushViewController(vc!, animated: true)

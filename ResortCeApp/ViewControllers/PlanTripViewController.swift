@@ -552,6 +552,7 @@ extension PlanTripViewController : UITableViewDelegate,UITableViewDataSource {
                 let dataDictHotel: [String:Any] = ["HotelId":hotelID,"HotelName": hotelName,"HotelAddress":hotelName,"HotelLatitude": hotelCurrentLat.toString() ,"HotelLongitude":hotelCurrentLong.toString(), "HotelPhone": hotelPhoneNumber, "HotelWebsite": hotelwebsite]
                 vc.GethotelDict = dataDictHotel
                 vc.getGroupId = self.groupArr[indexPath.row].groupId
+                vc.shouldShowBuyBtn = false
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }

@@ -40,10 +40,10 @@ class LecturesInProgressVc: UIViewController {
     }
     func postLectInProgress() {
         if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
-           var authKey1 = "fee200efbd8dbc3e40b44d88ae6f1fb8f535e2e4"
+          
             ActivityIndicator.shared.show(self.view)
             DataManager.postAPIWithParameters(urlString: API.course_in_progress_listing
-                , jsonString: Request.setauthKey(authKey1) as [String : AnyObject], success: {
+                , jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
                     sucess in
                     ActivityIndicator.shared.hide()
                     if let nameArr = sucess["body"] as? [[String:Any]] {

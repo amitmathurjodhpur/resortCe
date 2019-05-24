@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 /* This Extension is for Add Expense View */
-extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate, ResetTripDelegate {
     
     @IBAction func receiptAction(_ sender: Any) {
        
@@ -84,6 +84,9 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
                                 self.expenseArr[index].expenseAmount = expAmount
                                 self.expenseArr[index].expenseDate = startDate
                                 self.expenseArr[index].receiptPath = self.expenseImagePath
+                             } else if let msg = success["message"] as? String, msg == "success" {
+                                let expense = Expense.init(expenseId: "", expenseName: self.expenseName.text ?? "", expenseType: self.expenseTypeTxt.text ?? "", expenseAmount: self.expenseAmountTxt.text ?? "", expenseDate: self.expenseDate.text ?? "", receiptPath: "")
+                                self.expenseArr.append(expense)
                             }
                         } else {
                             let expense = Expense.init(expenseId: "", expenseName: self.expenseName.text ?? "", expenseType: self.expenseTypeTxt.text ?? "", expenseAmount: self.expenseAmountTxt.text ?? "", expenseDate: self.expenseDate.text ?? "", receiptPath: self.expenseImagePath)
@@ -115,12 +118,20 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
                             let expense = Expense.init(expenseId: "", expenseName: self.expenseName.text ?? "", expenseType: self.expenseTypeTxt.text ?? "", expenseAmount: self.expenseAmountTxt.text ?? "", expenseDate: self.expenseDate.text ?? "", receiptPath: "")
                             self.expenseArr.append(expense)
                         } else {
+                            if let imagePath = success["image"] as? String {
+                                self.expenseImagePath = imagePath
+                            } else {
+                                self.expenseImagePath = ""
+                            }
                             if let index = self.expenseArr.index(where: {$0.expenseId == self.expenseID}) {
                                 self.expenseArr[index].expenseName = nameText
                                 self.expenseArr[index].expenseType = expType
                                 self.expenseArr[index].expenseAmount = expAmount
                                 self.expenseArr[index].expenseDate = startDate
-                                self.expenseArr[index].receiptPath = ""
+                                self.expenseArr[index].receiptPath = self.expenseImagePath
+                            } else if let msg = success["message"] as? String, msg == "success" {
+                                let expense = Expense.init(expenseId: "", expenseName: self.expenseName.text ?? "", expenseType: self.expenseTypeTxt.text ?? "", expenseAmount: self.expenseAmountTxt.text ?? "", expenseDate: self.expenseDate.text ?? "", receiptPath: "")
+                                self.expenseArr.append(expense)
                             }
                         }
                         self.expenseName.text = ""
@@ -187,12 +198,12 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
         self.navigationController?.pushViewController(vc!, animated: true)*/
         DispatchQueue.main.async {
             UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
-                self?.tipNameView.isHidden = true
+               /* self?.tipNameView.isHidden = true
                 self?.courseView.isHidden = false
                 self?.expenseScrollView.isHidden = true
                 self?.segmentView.selectedSegmentIndex = 2
-                self?.nextBtn.isHidden = true
-                self?.addgroups()
+                self?.nextBtn.isHidden = true*/
+                self?.getNearByGroups()
             })
         }
     }
@@ -223,10 +234,10 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
         expenseArr.removeAll()
     }
     
-    func addgroups() {
+    func getNearByGroups() {
         if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
             ActivityIndicator.shared.show(self.view)
-            DataManager.postAPIWithParameters(urlString: API.getnearbygroups, jsonString: Request.GetNearGroups(authKey, hotelCurrentLat.toString(), hotelCurrentLong.toString(), "50") as [String : AnyObject], success: {
+            DataManager.postAPIWithParameters(urlString: API.getnearbygroups, jsonString: Request.GetNearGroups(authKey, hotelCurrentLat.toString(), hotelCurrentLong.toString(), "1000") as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()
                 if let groups = sucess["body"] as? [[String:Any]], groups.count > 0 {
@@ -237,13 +248,31 @@ extension PlanTripViewController: UIImagePickerControllerDelegate, UINavigationC
                         }
                     }
                         DispatchQueue.main.async {
-                            self.courseTableView.reloadData()
+                            //self.courseTableView.reloadData()
+                            self.moveToLectures()
                         }
                 }
             }, failure: {
                 fail in
                 ActivityIndicator.shared.hide()
             })
+        }
+    }
+    
+    func moveToLectures() {
+        if self.groupArr.count > 0, let vc = self.storyboard?.instantiateViewController(withIdentifier: "LecturesAvailableVc") as? LecturesAvailableVc {
+            let dataDictHotel: [String:Any] = ["HotelId":hotelID,"HotelName": hotelName,"HotelAddress":hotelName,"HotelLatitude": hotelCurrentLat.toString() ,"HotelLongitude":hotelCurrentLong.toString(), "HotelPhone": hotelPhoneNumber, "HotelWebsite": hotelwebsite]
+            vc.GethotelDict = dataDictHotel
+            vc.getGroupId = self.groupArr[0].groupId
+            vc.resetTripDelegate = self
+            vc.shouldShowBuyBtn = false
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    func resetTripData() {
+         if !self.isEditMode {
+            self.moveToCreatetrip()
         }
     }
 }

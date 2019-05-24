@@ -246,32 +246,37 @@ extension Lect1Detail: SKProductsRequestDelegate,SKPaymentTransactionObserver{
         print(response.products)
         var ProductIndex = Int()
         var productIdIndex = ""
-        if StringCourseFee == "1" {
-            ProductIndex = 0
-            productIdIndex = ProductID.ResortCeFirst
-        } else if StringCourseFee == "10" {
-            ProductIndex = 1
-            productIdIndex = ProductID.ResortCeFourth
-        } else if StringCourseFee == "20" {
-            ProductIndex = 2
-            productIdIndex = ProductID.ResortCeSecond
-        } else if StringCourseFee == "30" {
-            ProductIndex = 3
-            productIdIndex = ProductID.ResortCeThird
-        }
-        let count : Int = response.products.count
-        if (count>0) {
-            let validProduct: SKProduct = response.products[ProductIndex] as SKProduct
-            if (validProduct.productIdentifier == productIdIndex as String) {
-                print(validProduct.localizedTitle)
-                print(validProduct.localizedDescription)
-                print(validProduct.price)
-                self.buyProduct(product: validProduct)
-            } else {
-                print(validProduct.productIdentifier)
+        if let Course_Fees = Int(StringCourseFee) {
+            if Course_Fees >= 1 ||  Course_Fees <= 9 {
+                ProductIndex = 0
+                productIdIndex = ProductID.ResortCeFirst
+            } else if Course_Fees >= 10 || Course_Fees <= 19 {
+                ProductIndex = 2
+                productIdIndex = ProductID.ResortCeSecond
+            } else if Course_Fees >= 20 || Course_Fees <= 29 {
+                ProductIndex = 3
+                productIdIndex = ProductID.ResortCeThird
+            } else if Course_Fees >= 30 || Course_Fees <= 39 {
+                ProductIndex = 1
+                productIdIndex = ProductID.ResortCeFourth
             }
-        } else {
-            print("nothing")
+            
+            let count : Int = response.products.count
+            if (count > 0) {
+                let validProduct: SKProduct = response.products[ProductIndex] as SKProduct
+                if (validProduct.productIdentifier == productIdIndex as String) {
+                    print(validProduct.localizedTitle)
+                    print(validProduct.localizedDescription)
+                    print(validProduct.price)
+                    self.buyProduct(product: validProduct)
+                } else {
+                    ActivityIndicator.shared.hide()
+                    print(validProduct.productIdentifier)
+                }
+            } else {
+                ActivityIndicator.shared.hide()
+                print("nothing")
+            }
         }
     }
     

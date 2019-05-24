@@ -6,6 +6,7 @@
 //  Copyright © 2018 AJ12. All rights reserved.
 //
 import UIKit
+import CoreLocation
 
 class CellMenu: UITableViewCell
 {
@@ -108,6 +109,10 @@ class HomeMenuVc: UIViewController {
                 ActivityIndicator.shared.hide()
                 UserDefaults.standard.set("0", forKey: "auth_key")
                 UserDefaults.standard.set("0", forKey: AppKey.LoginStatus)
+                UserDefaults.standard.removeObject(forKey:"myLocation")
+                 UserDefaults.standard.removeObject(forKey:"useraddress")
+                UserDefaults.standard.synchronize()
+                
                 User.iswhichUser = "0"
                 let vc =  self.storyboard?.instantiateViewController(withIdentifier: "LoginVc") as! LoginVc
                 let navigationController = UINavigationController(rootViewController: vc)

@@ -30,27 +30,33 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         getCurrentLocation()
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.userprofile()
         }
-        
       }
     
     func getHotelsNearBy() {
          if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
-            //let dic = ["user_id": userId ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString(), "onlycount": "1"]
-             let dic = ["user_id": "255" ,"current_lat": "12.932979", "current_long": "77.612367", "onlycount": "1"]
-            ActivityIndicator.shared.show(self.view)
+            self.MenuArray.removeAll()
+            if let userLocation = UserDefaults.standard.location(forKey:"myLocation") {
+                userCurrentLat = userLocation.coordinate.latitude
+                userCurrentLong = userLocation.coordinate.longitude
+            }
+            let dic = ["user_id": userId ,"current_lat": userCurrentLat.toString(), "current_long": userCurrentLong.toString(), "onlycount": "0"]
+            print(dic)
+             ActivityIndicator.shared.show(self.view)
             //API.getHotels
             DataManager.postAPIWithParameters(urlString:API.getHotels, jsonString: dic as [String : AnyObject], success: { [weak self] sucess in
                 ActivityIndicator.shared.hide()
                 print("Hotels near by: \n \(sucess)")
                 if let count = sucess.value(forKey: "count") as? Int {
                     if count > 0 {
+                        if let hotelsObj = sucess.value(forKey: "hotels") as? [Dictionary<String, Any>] {
+                            self?.parseData(hotelData: hotelsObj)
+                        }
                         self?.MenuArray.append("Resortce Concierge")
                         self?.MenuArray.append("Plan A Trip")
-                        self?.MenuArray.append("Trip Tacker")
+                        self?.MenuArray.append("Trip Tracker")
                         self?.MenuArray.append("CE Tracker")
                        
                         self?.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
@@ -60,7 +66,7 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
                     } else {
                         //self?.MenuArray.append("Resortce Concierge")
                         self?.MenuArray.append("Plan A Trip")
-                        self?.MenuArray.append("Trip Tacker")
+                        self?.MenuArray.append("Trip Tracker")
                         self?.MenuArray.append("CE Tracker")
                         
                        // self?.imageArray.append(#imageLiteral(resourceName: "Resortceicon"))
@@ -79,8 +85,31 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
         }
     }
     
+    func parseData(hotelData: [Dictionary<String, Any>]) {
+        //for hotelObj in hotelData {
+            if let hotel = hotelData.first as Dictionary<String, AnyObject>?, let hotelId = hotel["hotel_Id"] as? String, let hotelName = hotel["hotel_name"] as? String, let hotelAddress = hotel["hotel_address"] as? String, let hotelLat = hotel["hotel_latitude"] as? String, let hotelLong = hotel["hotel_longitude"] as? String, let hotelPhoneNo = hotel["hotel_phone"] as? String, let hotelWebsite = hotel["hotel_website"] as? String {
+                var tmpCourseArr: [Course] = []
+                if let courses = hotel["courses"] as? [Dictionary<String, Any>] {
+                    for courseObj in courses {
+                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String, let dt = course["date"] as? String {
+                            let course = Course.init(courseId: courseId, courseName: courseName, status: status, courseDate: dt)
+                            tmpCourseArr.append(course)
+                        }
+                    }
+                }
+                
+               // if tmpCourseArr.count > 0 {
+                    let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                     let hotelObj = Hotel.init(hotelId: hotelId, hotelName: hotelName, hotelAddress: hotelAddress, hotelLat: hotelLat, hotelLong: hotelLong, hotelPhoneNo: hotelPhoneNo, hotelWebsite: hotelWebsite, coursesInHotel: tmpCourseArr)
+                    appDelegate.currentHotel = hotelObj
+               // }
+            }
+       // }
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.isNavigationBarHidden = true
+        getHotelsNearBy()
     }
     
    func OkAction(action: UIAlertAction) {
@@ -91,7 +120,7 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     
     func newUserCompleted() {
         MenuArray.append("Plan A Trip")
-        MenuArray.append("Trip Tacker")
+        MenuArray.append("Trip Tracker")
         MenuArray.append("CE Tracker")
         
         imageArray.append(#imageLiteral(resourceName: "trackerIcon"))

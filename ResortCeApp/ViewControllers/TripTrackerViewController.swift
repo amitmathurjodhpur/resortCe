@@ -59,7 +59,6 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
             print("Dict: \n\(dic)")
             DataManager.postAPIWithParameters(urlString: API.getTrips , jsonString: dic as [String : AnyObject], success: {
                 success in
-                print(success)
                 ActivityIndicator.shared.hide()
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
                     print(response.count)
@@ -103,11 +102,11 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                 if let response = success as? [Dictionary<String, AnyObject>], response.count > 0 {
                     self.sectionNames = [ "Enrolled Courses", "Completed Courses"]
                     for courseObj in response {
-                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? String, let dt = course["date"] as? String {
-                            let course = Course.init(courseId: courseId, courseName: courseName, status: status, courseDate: dt)
-                            if status == "0" {
+                        if let course = courseObj as Dictionary<String, AnyObject>?, let courseId = course["course_id"] as? String, let courseName = course["course_name"] as? String, let status = course["status"] as? Int, let dt = course["date"] as? String {
+                            let course = Course.init(courseId: courseId, courseName: courseName, status: String(status), courseDate: dt)
+                            if status == 1 {
                                 self.inProgressCourses.append(course)
-                            } else if status == "1" {
+                            } else if status == 2 {
                                 self.completedCourses.append(course)
                             }
                         }

@@ -39,16 +39,23 @@ class LockerVc: UIViewController{
     var ProgressArray : [[String:Any]] = []
     var TripArray : [[String:Any]] = []
     @IBOutlet weak var CollVw: UICollectionView!
+    var shouldShowTrips: Bool = false
+    @IBOutlet weak var addTripBtn: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         postLectInProgress()
-       PostLockerList()
+        PostLockerList()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.isNavigationBarHidden  = true
-        postTripListing()
+        if self.shouldShowTrips {
+             addTripBtn.isHidden = false
+             postTripListing()
+        } else {
+            addTripBtn.isHidden = true
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -154,19 +161,18 @@ class LockerVc: UIViewController{
         }
     }
     
-    func TripReport(_ indexPath:Int)
-    {
+    func TripReport(_ indexPath:Int) {
         let vc = storyboard?.instantiateViewController(withIdentifier: "TripReportVc") as? TripReportVc
         vc?.GetReportTrip = TripArray[indexPath]
         self.navigationController?.pushViewController(vc!, animated: false)
     }
     
-    func EnterTrip(_ indexPath:Int)
-    {
+    func EnterTrip(_ indexPath:Int) {
         let vc = storyboard?.instantiateViewController(withIdentifier: "CreateTripVcViewController") as? CreateTripVcViewController
         vc?.GetDetailTrip = TripArray[indexPath]
         self.navigationController?.pushViewController(vc!, animated: false)
     }
+    
     func dateConvert(_ TimeStamp:String) -> String {
         let unixTimestamp = TimeStamp
         if let timeStamp = Double(unixTimestamp) {
@@ -182,190 +188,245 @@ class LockerVc: UIViewController{
     }
     
 }
-extension LockerVc : UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout
-{
+extension LockerVc : UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout {
     
-    func numberOfSections(in collectionView: UICollectionView) -> Int
-    {
-         return 3
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        if shouldShowTrips {
+            return 3
+        }
+         return 2
     }
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int
-    {
-        if section == 1
-        {
-        return nameArray.count
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int  {
+        if shouldShowTrips {
+            if section == 1 {
+                return nameArray.count
+            } else if section == 2  {
+                return ProgressArray.count
+            }  else {
+                return TripArray.count
+            }
+        } else {
+            if section == 0 {
+                return nameArray.count
+            } else if section == 1  {
+                return ProgressArray.count
+            }
         }
-        else if section == 2
-        {
-            return ProgressArray.count
-        }
-        else
-        {
-            return TripArray.count
-        }
+        return 0
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
-    {
-        if indexPath.section == 1 {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLocker", for: indexPath) as? CellLocker
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if shouldShowTrips {
+            if indexPath.section == 1 {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLocker", for: indexPath) as? CellLocker
                 let values = nameArray[indexPath.item]
                 let photo = values["course_image"] as? String
                 let unixTimestamp = values["created"] as? String
                 if let timeStamp = unixTimestamp {
-                let startDate = dateConvert(timeStamp)
-                cell?.LblDate.text = startDate
+                    let startDate = dateConvert(timeStamp)
+                    cell?.LblDate.text = startDate
                 }
                 cell?.BtnCertificate.tag = indexPath.row
                 if let photoObj = photo, !photoObj.isEmpty {
-                cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage:#imageLiteral(resourceName: "Bed") )
+                    cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage:#imageLiteral(resourceName: "Bed") )
                 }
                 if let course_name = values["course_name"] as? String {
                     cell?.TxtVw.text = course_name
                 }
                 return cell!
+            } else if indexPath.section == 2  {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLockerIP", for: indexPath) as? CellLockerIP
+                let values = ProgressArray[indexPath.row]
+                let photo = values["image"] as? String
+                if let name = values["name"] as? String {
+                    cell?.LblCname.text = name
+                }
+                if let value = values["overview"] as? String {
+                    cell?.TxtVw.text = value
+                }
+                
+                if let photoObj = photo, !photoObj.isEmpty {
+                    cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage: UIImage(named: "Bed"))
+                }
+                return cell!
+            } else {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLockerTrip", for: indexPath) as? CellLockerTrip
+                let values = TripArray[indexPath.row]
+                cell?.LblTripname.text = values["trip_name"] as? String
+                cell?.LblNuCourses.text = values["total_course"] as? String
+                if let startDate = values["trip_date"] as? String, let endDate = values["end_date"] as? String {
+                    cell?.LblDate.text = startDate + " - " + endDate
+                }
+                
+                return cell!
+            }
+        } else {
+            if indexPath.section == 0 {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLocker", for: indexPath) as? CellLocker
+                let values = nameArray[indexPath.item]
+                let photo = values["course_image"] as? String
+                let unixTimestamp = values["created"] as? String
+                if let timeStamp = unixTimestamp {
+                    let startDate = dateConvert(timeStamp)
+                    cell?.LblDate.text = startDate
+                }
+                cell?.BtnCertificate.tag = indexPath.row
+                if let photoObj = photo, !photoObj.isEmpty {
+                    cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage:#imageLiteral(resourceName: "Bed") )
+                }
+                if let course_name = values["course_name"] as? String {
+                    cell?.TxtVw.text = course_name
+                }
+                return cell!
+            } else if indexPath.section == 1 {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLockerIP", for: indexPath) as? CellLockerIP
+                let values = ProgressArray[indexPath.row]
+                let photo = values["image"] as? String
+                if let name = values["name"] as? String {
+                    cell?.LblCname.text = name
+                }
+                if let value = values["overview"] as? String {
+                    cell?.TxtVw.text = value
+                }
+                
+                if let photoObj = photo, !photoObj.isEmpty {
+                    cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage: UIImage(named: "Bed"))
+                }
+                return cell!
+            }
         }
-        else if indexPath.section == 2
-        {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLockerIP", for: indexPath) as? CellLockerIP
-            let values = ProgressArray[indexPath.row]
-            let photo = values["image"] as? String
-            if let name = values["name"] as? String {
-                 cell?.LblCname.text = name
-            }
-            if let value = values["overview"] as? String {
-                cell?.TxtVw.text = value
-            }
-            
-            if let photoObj = photo, !photoObj.isEmpty {
-                cell?.ImageVw.sd_setImage(with: URL(string: photoObj), placeholderImage: UIImage(named: "Bed"))
-            }
-            return cell!
-        }else
-        {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CellLockerTrip", for: indexPath) as? CellLockerTrip
-             let values = TripArray[indexPath.row]
-            cell?.LblTripname.text = values["trip_name"] as? String
-            cell?.LblNuCourses.text = values["total_course"] as? String
-            if let startDate = values["trip_date"] as? String, let endDate = values["trip_end_date"] as? String {
-                let StartDate = dateConvert(startDate)
-                let EndDate = dateConvert(endDate)
-                cell?.LblDate.text = StartDate + " - " + EndDate
-            }
-            
-            return cell!
-        }
+        return UICollectionViewCell()
     }
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize
-    {
-       
-        if indexPath.section == 0
-        {
-             return CGSize(width: (collectionView.frame.width), height: 70)
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if shouldShowTrips {
+            if indexPath.section == 0  {
+                return CGSize(width: (collectionView.frame.width), height: 70)
+            } else {
+                return CGSize(width: (collectionView.frame.width/2)-5, height: 200)
+            }
+        } else {
+            return CGSize(width: (collectionView.frame.width/2)-5, height: 200)
         }
-        else
-        {
-             return CGSize(width: (collectionView.frame.width/2)-5, height: 200)
-        }
+        
     }
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView
-    {
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "ReuseableView", for: indexPath) as! ReuseableView
-        if indexPath.section == 1
-        {
-            if nameArray.count > 0
-            {
-            header.label.text = "Completed Courses"
+        if shouldShowTrips {
+            if indexPath.section == 1 {
+                if nameArray.count > 0 {
+                    header.label.text = "Completed Courses"
+                } else {
+                    header.label.text = "No Completed Courses"
+                }
+            } else if indexPath.section == 2 {
+                if ProgressArray.count > 0 {
+                    header.label.text = "In Progress Courses"
+                } else {
+                    header.label.text = "No In Progress Courses"
+                }
+            } else {
+                if TripArray.count > 0 {
+                    header.label.text = "Trips"
+                } else {
+                    header.label.text = "No Trips(Add One)"
+                }
             }
-            else
-            {
-                header.label.text = "No Completed Courses"
-            }
-        }
-        else if indexPath.section == 2
-        {
-            if ProgressArray.count > 0
-            {
-           header.label.text = "In Progress Courses"
-            }
-            else
-            {
-                header.label.text = "No In Progress Courses"
-            }
-        }
-        else
-        {
-            if TripArray.count > 0
-            {
-               header.label.text = "Trips"
-            }
-            else
-            {
-                header.label.text = "No Trips(Add One)"
+        } else {
+            if indexPath.section == 0 {
+                if nameArray.count > 0 {
+                    header.label.text = "Completed Courses"
+                } else {
+                    header.label.text = "No Completed Courses"
+                }
+            } else if indexPath.section == 1 {
+                if ProgressArray.count > 0 {
+                    header.label.text = "In Progress Courses"
+                } else {
+                    header.label.text = "No In Progress Courses"
+                }
             }
         }
         return header
     }
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath)
-    {
-        if indexPath.section == 0 {
-            
-            let alert:UIAlertController=UIAlertController(title: "Choose Option", message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
-            let ReportAction = UIAlertAction(title: "Trip Report/Edit", style: UIAlertActionStyle.default)
-            {
-                UIAlertAction in
-                self.TripReport(indexPath.row)
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if shouldShowTrips {
+            if indexPath.section == 0 {
+                let alert:UIAlertController=UIAlertController(title: "Choose Option", message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
+                let ReportAction = UIAlertAction(title: "Trip Report/Edit", style: UIAlertActionStyle.default)  {
+                    UIAlertAction in
+                    self.TripReport(indexPath.row)
+                }
+                let CerificateAction = UIAlertAction(title: "Certificate", style: UIAlertActionStyle.default) {
+                    UIAlertAction in
+                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "ReportVc") as? ReportVc
+                    vc?.tripdata = self.TripArray[indexPath.row]
+                    self.navigationController?.pushViewController(vc!, animated: false)
+                }
+                let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel)  {
+                    UIAlertAction in
+                }
+                // Add the actions
                 
-            }
-            let CerificateAction = UIAlertAction(title: "Certificate", style: UIAlertActionStyle.default)
-            {
-                UIAlertAction in
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "ReportVc") as? ReportVc
-                vc?.tripdata = self.TripArray[indexPath.row]
+                alert.addAction(ReportAction)
+                alert.addAction(CerificateAction)
+                alert.addAction(cancelAction)
+                self.present(alert, animated: true, completion: nil)
+                
+            } else if indexPath.section == 1  {
+                // let cell = collectionView.cellForItem(at: indexPath) as? CellLocker
+                let values = nameArray[indexPath.item]
+                let photo = values["course_image"] as? String
+                if photo != ""  {
+                    let url = URL(string: photo!)
+                    self.downloadImage(url:url!)
+                }
+                let vc = storyboard?.instantiateViewController(withIdentifier: "FirstVc") as? FirstVc
+                vc?.getReview = (values["course_id"] as? String)!
                 self.navigationController?.pushViewController(vc!, animated: false)
+            } else if indexPath.section == 2 {
+                let values = ProgressArray[indexPath.row]
+                let  PostLectId = values["id"] as! String
+                let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
+                vc?.detail = PostLectId
+                vc?.shouldShowBuyBtn = true
+                self.navigationController?.pushViewController(vc!, animated: true)
+                let photo = values["image"] as? String
+                if photo != "" {
+                    let url = URL(string: photo!)
+                    self.downloadImage(url:url!)
+                }
             }
-            let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel)
-            {
-                UIAlertAction in
-            }
-            // Add the actions
-            
-            alert.addAction(ReportAction)
-            alert.addAction(CerificateAction)
-            alert.addAction(cancelAction)
-            self.present(alert, animated: true, completion: nil)
-            
-        }
-       // let cell = collectionView.cellForItem(at: indexPath) as? CellLocker
-       else if indexPath.section == 1
-        {
-            let values = nameArray[indexPath.item]
-            let photo = values["course_image"] as? String
-            if photo != ""
-            {
-                let url = URL(string: photo!)
-                self.downloadImage(url:url!)
+        } else {
+            if indexPath.section == 0 {
+                // let cell = collectionView.cellForItem(at: indexPath) as? CellLocker
+                let values = nameArray[indexPath.item]
+                let photo = values["course_image"] as? String
+                if photo != ""  {
+                    let url = URL(string: photo!)
+                    self.downloadImage(url:url!)
+                }
+                let vc = storyboard?.instantiateViewController(withIdentifier: "FirstVc") as? FirstVc
+                vc?.getReview = (values["course_id"] as? String)!
+                self.navigationController?.pushViewController(vc!, animated: false)
                 
-            }
-            let vc = storyboard?.instantiateViewController(withIdentifier: "FirstVc") as? FirstVc
-            vc?.getReview = (values["course_id"] as? String)!
-            self.navigationController?.pushViewController(vc!, animated: false)
-        }
-        else if indexPath.section == 2
-        {
-            let values = ProgressArray[indexPath.row]
-            let  PostLectId = values["id"] as! String
-            let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
-            vc?.detail = PostLectId
-            vc?.shouldShowBuyBtn = true
-            self.navigationController?.pushViewController(vc!, animated: true)
-            let photo = values["image"] as? String
-            if photo != ""
-            {
-                let url = URL(string: photo!)
-                self.downloadImage(url:url!)
+            } else if indexPath.section == 1 {
+                let values = ProgressArray[indexPath.row]
+                let  PostLectId = values["id"] as! String
+                let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
+                vc?.detail = PostLectId
+                vc?.shouldShowBuyBtn = true
+                self.navigationController?.pushViewController(vc!, animated: true)
+                let photo = values["image"] as? String
+                if photo != "" {
+                    let url = URL(string: photo!)
+                    self.downloadImage(url:url!)
+                }
             }
         }
+        
     }
 }
 

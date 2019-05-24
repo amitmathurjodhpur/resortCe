@@ -10,7 +10,8 @@ import UIKit
 
 class ResortceViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
-   
+    var groupArr: [GroupLecture] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
@@ -21,6 +22,7 @@ class ResortceViewController: UIViewController, UITableViewDelegate, UITableView
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.isNavigationBarHidden  = false
         self.title = "Resortce Concierge"
+        self.getNearByGroups()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -50,17 +52,52 @@ class ResortceViewController: UIViewController, UITableViewDelegate, UITableView
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if indexPath.row == 0 {
+        if indexPath.row == 0, self.groupArr.count > 0 {
             /*let vc = storyboard?.instantiateViewController(withIdentifier: "FindLocationVc") as? FindLocationVc
-            self.navigationController?.pushViewController(vc!, animated: true)*/
-            let vc = storyboard?.instantiateViewController(withIdentifier: "hotellistvc") as? HotelListViewController
             self.navigationController?.pushViewController(vc!, animated: true)
+            let vc = storyboard?.instantiateViewController(withIdentifier: "hotellistvc") as? HotelListViewController
+            self.navigationController?.pushViewController(vc!, animated: true) */
+            if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LecturesAvailableVc") as? LecturesAvailableVc {
+                let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                if let hotelObj = appDelegate.currentHotel {
+                    let dataDictHotel: [String:Any] = ["HotelId":hotelObj.hotelId,"HotelName": hotelObj.hotelName,"HotelAddress":hotelObj.hotelName,"HotelLatitude": hotelObj.hotelLat ,"HotelLongitude":hotelObj.hotelLong, "HotelPhone": hotelObj.hotelPhoneNo, "HotelWebsite": hotelObj.hotelWebsite]
+                    vc.GethotelDict = dataDictHotel
+                    vc.getGroupId = self.groupArr[indexPath.row].groupId
+                    vc.shouldShowBuyBtn = true
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
         } else  if indexPath.row == 2 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "LockerVc") as? LockerVc
+            vc?.shouldShowTrips = false
             self.navigationController?.pushViewController(vc!, animated: true)
         } else  if indexPath.row == 1 {
             let vc = storyboard?.instantiateViewController(withIdentifier: "LockerVc") as? LockerVc
+            vc?.shouldShowTrips = true
             self.navigationController?.pushViewController(vc!, animated: true)
+        }
+    }
+    
+    func getNearByGroups() {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            ActivityIndicator.shared.show(self.view)
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            DataManager.postAPIWithParameters(urlString: API.getnearbygroups, jsonString: Request.GetNearGroups(authKey, appDelegate.currentHotel?.hotelLat ?? "0.0", appDelegate.currentHotel?.hotelLong ?? "0.0", "1000") as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                if let groups = sucess["body"] as? [[String:Any]], groups.count > 0 {
+                    for groupObj in groups {
+                        if let course = groupObj as Dictionary<String, AnyObject>?, let groupId = course["id"] as? String, let groupName = course["name"] as? String, let groupAddress = course["address"] as? String, let dt = course["date"] as? String, let groupLat = course["latitude"] as? String, let groupLong = course["longitude"] as? String, let groupImage = course["image"] as? String, let groupDesc = course["description"] as? String {
+                            let course = GroupLecture.init(groupId: groupId, groupName: groupName, groupAddress: groupAddress, groupLat: groupLat, groupLong: groupLong, groupDate: dt, groupImage: groupImage, groupDesc: groupDesc)
+                            self.groupArr.append(course)
+                        }
+                    }
+                    
+                }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
         }
     }
     

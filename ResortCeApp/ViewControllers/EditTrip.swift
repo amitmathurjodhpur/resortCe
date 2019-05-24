@@ -22,11 +22,10 @@ class EditTrip: UIViewController {
     var datePicker = UIDatePicker()
     var picker = UIPickerView()
     var imagePicker = UIImagePickerController()
-    var ExpensesTypes : [String] = ["Travel","Meals","Lodging","Others"]
+    var ExpensesTypes : [String] = ["Lodging" , "Transportation/Airfare" , "Meals" , "Other"]
     var ExpensesAmounts : [String] = ["0","0","0","0"]
     var tripId = ""
     var ExpenseId = ""
-    
     
     var GetDataTrip = [String:Any]()
 
@@ -37,10 +36,10 @@ class EditTrip: UIViewController {
         DateExpensesTF.delegate = self
         AttachmentTF.delegate = self
         if tripId == "" {
-        FillData()
+            FillData()
          LblHeading.text = "Edit Expense"
         } else {
-             LblHeading.text = "Add Expense"
+        LblHeading.text = "Add Expense"
         }
 
     }
@@ -58,11 +57,11 @@ class EditTrip: UIViewController {
         ExpenseId = GetDataTrip["id"] as? String ?? ""
         NameTF.text = GetDataTrip["expensis_name"] as? String
         TypeOfExpensis.text = GetDataTrip["expensis_type"] as? String
-        DateExpensesTF.text = dateConvert(GetDataTrip["expensis_date"] as? String ?? "")
+        DateExpensesTF.text = GetDataTrip["expensis_date"] as? String ?? ""
         ExpensesDateInStamp = GetDataTrip["expensis_date"] as? String ?? ""
         ExpenseAmountTF.text = GetDataTrip["expensis_amount"] as? String
-        let image = GetDataTrip["image"] as? String
-        if image != nil, let img = image {
+        let image = GetDataTrip["expensis_image"] as? String
+        if let img = image {
            ImageVwAttachment.sd_setImage(with: URL(string: img), placeholderImage: #imageLiteral(resourceName: "Bed"))
         }
     }
@@ -137,7 +136,7 @@ class EditTrip: UIViewController {
     
     @IBAction func ActnSaveBtn(_ sender: Any) {
         if GetDataTrip.count > 0 {
-        self.PostEditExpenses()
+            self.postExpense(type: "1")
         } else {
             if NameTF.text == "" {
                 UIAlertController.show(self, "Name", "Enter Name")
@@ -150,7 +149,7 @@ class EditTrip: UIViewController {
             } else if AttachmentTF.text == "" {
                  UIAlertController.show(self, "Image", "Select Any Image")
             } else {
-                PostAddExpenses()
+                self.postExpense(type: "2")
             }
         }
     }
@@ -198,7 +197,7 @@ class EditTrip: UIViewController {
     
     
     ////////////////
-    func PostEditExpenses() {
+   /* func PostEditExpenses() {
         if let imageObj = self.ImageVwAttachment.image, let imageData = UIImageJPEGRepresentation(imageObj, 0.5) as NSData?, let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
             ActivityIndicator.shared.show(self.view)
             let data = imageData
@@ -240,6 +239,62 @@ class EditTrip: UIViewController {
                 fail in
                 ActivityIndicator.shared.hide()
             })
+        }
+    }*/
+    
+    func postExpense(type: String) {
+        if let nameText = NameTF.text, !nameText.isEmpty, let startDate = DateExpensesTF.text, !startDate.isEmpty, let expType = TypeOfExpensis.text, !expType.isEmpty, let expAmount = ExpenseAmountTF.text, !expAmount.isEmpty {
+            self.view.endEditing(true)
+            ActivityIndicator.shared.show(self.view)
+            
+            var dic: [String:Any] = [:]
+            var urlStr = ""
+            if type == "1" {
+                dic =  ["trip_id": tripId ,"expensis_name": nameText, "expensis_date": startDate, "expensis_type": expType, "expensis_amount":expAmount, "id": self.ExpenseId]
+                urlStr = API.editExpense
+            } else {
+                dic =  ["trip_id": tripId ,"expensis_name": nameText, "expensis_date": startDate, "expensis_type": expType, "expensis_amount":expAmount]
+                urlStr = API.addTripExpenses
+            }
+            
+           print("Dict: \n\(dic)")
+            if let currImage = self.ImageVwAttachment.image, let imageData = UIImageJPEGRepresentation(currImage, 0.5) as NSData? {
+                DataManager.postMultipartDataWithParameters(urlString: urlStr, imageData: ["expensis_image": imageData] as [String : Data], params: dic as [String : AnyObject], success: {
+                    success in
+                    print(success)
+                    ActivityIndicator.shared.hide()
+                    if let navController = self.navigationController {
+                        let viewControllers: [UIViewController] = navController.viewControllers
+                        for aViewController in viewControllers {
+                            if aViewController is LockerVc {
+                                navController.popToViewController(aViewController, animated: true)
+                            }
+                        }
+                    }
+                      }, failure: {
+                    fail in
+                    ActivityIndicator.shared.hide()
+                })
+            } else {
+                print("Dict: \n\(dic)")
+                DataManager.postAPIWithParameters(urlString: API.addTripExpenses , jsonString: dic as [String : AnyObject], success: {
+                    success in
+                    print(success)
+                    ActivityIndicator.shared.hide()
+                    if let navController = self.navigationController {
+                        let viewControllers: [UIViewController] = navController.viewControllers
+                        for aViewController in viewControllers {
+                            if aViewController is LockerVc {
+                                navController.popToViewController(aViewController, animated: true)
+                            }
+                        }
+                    }
+                }, failure: {
+                    failure in
+                    ActivityIndicator.shared.hide()
+                    print(failure)
+                })
+            }
         }
     }
 }

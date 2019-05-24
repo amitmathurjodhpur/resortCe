@@ -53,7 +53,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate,GIDSignInDelegate{
     
     var window: UIWindow?
     var loginStr : String = ""
-
+    var currentHotel: Hotel?
+    
     func registerForRemoteNotification() {
         if #available(iOS 10.0, *) {
             let center  = UNUserNotificationCenter.current()

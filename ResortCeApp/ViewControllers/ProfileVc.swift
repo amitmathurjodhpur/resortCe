@@ -8,8 +8,7 @@
 
 import UIKit
 
-
-class ProfileVc: UIViewController {
+class ProfileVc: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var TxtGender: UILabel!
     @IBOutlet weak var TxtMobile: UILabel!
@@ -26,11 +25,16 @@ class ProfileVc: UIViewController {
     @IBOutlet weak var TxtLicenseNumber: UITextField!
     @IBOutlet weak var TxtNextREnewalData: UITextField!
     @IBOutlet weak var TxtRenewalcycle: UITextField!
+    @IBOutlet weak var TxtLocation: UITextField!
+    
+    var userCurrentLat = 0.0
+    var userCurrentLong = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         UserImage.layer.cornerRadius = UserImage.frame.height/2
         TxtDob.isHidden = true
- 
+        TxtLocation.delegate = self
         
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -64,6 +68,11 @@ class ProfileVc: UIViewController {
                 self.TxtNextREnewalData.text = (userObj["next_renewal_date"] as? String)
                 self.TxtStateOflicensure.text = (userObj["license"] as? String)
                 self.TxtLicenseNumber.text = (userObj["license_number"] as? String)
+                if let addressKey = UserDefaults.standard.value(forKey: "useraddress") as? String {
+                    self.TxtLocation.text = addressKey
+                } else {
+                    self.TxtLocation.text = ""
+                }
             }
             }, failure: {
                 fail in
@@ -86,6 +95,5 @@ class ProfileVc: UIViewController {
         let vc = storyboard?.instantiateViewController(withIdentifier: "EditProfileVc") as? EditProfileVc
         self.navigationController?.pushViewController(vc!, animated: false)
     }
+    
 }
-
-

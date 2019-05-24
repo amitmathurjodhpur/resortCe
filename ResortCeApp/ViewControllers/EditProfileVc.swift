@@ -12,6 +12,7 @@ import GooglePlaces
 import GooglePlacePicker
 import SDWebImage
 import IQKeyboardManager
+import CoreLocation
 
 protocol NewUserDelegate: class {
     func newUserCompleted()
@@ -33,6 +34,8 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
      @IBOutlet weak var TxtLicenseNumber: UITextField!
      @IBOutlet weak var TxtNextREnewalData: UITextField!
      @IBOutlet weak var TxtRenewalcycle: UITextField!
+    @IBOutlet weak var TxtLocation: UITextField!
+    
     let datePicker = UIDatePicker()
     var imagePicker = UIImagePickerController()
     var locationManager = CLLocationManager()
@@ -49,12 +52,15 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
     var profid = ""
     var ProfId2 = ""
     let picker = UIPickerView()
+    var isUserLocationUpdate: Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        getCurrentLocation()
         TxtMobileNo.delegate = self
         TxtEmail.delegate = self
         TxtAddress.delegate = self
+        TxtLocation.delegate = self
         imagePicker.delegate = self
         UserImage.layer.cornerRadius = UserImage.frame.height/2
         self.getUserProfile()
@@ -62,16 +68,44 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
         TxtDOB.isHidden = true
         RenewalCyleArray = ["Annually","Every 2 years","Every 3 years"]
     }
+    
+    //MARK: - Location Manager
+    func getCurrentLocation() {
+        if CLLocationManager.locationServicesEnabled() {
+            switch CLLocationManager.authorizationStatus() {
+            case .notDetermined, .restricted, .denied:
+                break
+            case .authorizedAlways, .authorizedWhenInUse:
+                break
+            }
+        } else {
+            print("Location services are not enabled")
+        }
+        determineMyCurrentLocation()
+    }
+    
+    func determineMyCurrentLocation() {
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestAlwaysAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.startUpdatingLocation()
+        }
+    }
+    
     func searchBarBtnPressed(_ sender: Any) {
         let autocompleteController = GMSAutocompleteViewController()
         autocompleteController.delegate = self
         present(autocompleteController, animated: true, completion: nil)
     }
     func locationManager(_ manager: CLLocationManager,didUpdateLocations locations: [CLLocation]) {
-        let location = locationManager.location?.coordinate
-        CurrentLati = (location?.latitude)!
-        CurrentLongi = (location?.longitude)!
-        userCurrentLocation = locationManager.location!.coordinate
+        if let location = locationManager.location?.coordinate {
+            CurrentLati = location.latitude
+            CurrentLongi = location.longitude
+            userCurrentLocation = location
+        }
     }
    
     //SEARCH LOCATION ON MAP
@@ -91,8 +125,8 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
-    func datePickerVw()
-    {
+    
+    func datePickerVw() {
         datePicker.datePickerMode = .date
         datePicker.maximumDate = NSDate() as Date
         //ToolBar
@@ -105,19 +139,19 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
         TxtDOB.inputAccessoryView = toolbar
         TxtDOB.inputView = datePicker
     }
-    @objc func donedatePicker()
-    {
+    
+    @objc func donedatePicker() {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd/yyyy"
         TxtDOB.text = formatter.string(from: datePicker.date)
         self.view.endEditing(true)
     }
-    @objc func cancelDatePicker()
-    {
+    
+    @objc func cancelDatePicker() {
         self.view.endEditing(true)
     }
-    func pickerVw(_ sender:UITextField)
-    {
+    
+    func pickerVw(_ sender:UITextField) {
         picker.backgroundColor = UIColor.white
         picker.showsSelectionIndicator = true
         picker.delegate = self
@@ -134,11 +168,11 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
         sender.inputView = picker
         sender.inputAccessoryView = toolBar
     }
-    @objc func donePicker()
-    {
+    
+    @objc func donePicker() {
         self.view.endEditing(true)
-       
     }
+    
     func getUserProfile() {
         if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
             ActivityIndicator.shared.show(self.view)
@@ -166,16 +200,21 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
                     } else {
                         self.TxtDOB.text = (UserDefaults.standard.value(forKey: "dob")  as! String)
                     }
+                    
+                    if let addressKey = UserDefaults.standard.value(forKey: "useraddress") as? String {
+                        self.TxtLocation.text = addressKey
+                    } else {
+                        self.TxtLocation.text = ""
+                    }
+                    
                     let photo = user_dict["image"] as? String
                     self.UserImage.sd_setImage(with: URL(string: photo ?? ""), placeholderImage:#imageLiteral(resourceName: "DefaultImage"))
                 }
-                
             }, failure: {
                 fail in
                 ActivityIndicator.shared.hide()
             })
         }
-        
     }
     
     func getProfessionListing() {
@@ -185,7 +224,10 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
             DataManager.postAPIWithParameters(urlString: API.profession_listing, jsonString: Request.setauthKey(authKey) as [String : AnyObject], success: {
                 sucess in
                 ActivityIndicator.shared.hide()
-                self.ProfessionArray  = sucess.value(forKey: "body") as! [[String:Any]]
+                if let profArr = sucess.value(forKey: "body") as? [[String:Any]] {
+                    self.ProfessionArray  = profArr
+                }
+                
                 print(self.ProfessionArray)
             }, failure: {
                 fail in
@@ -231,29 +273,26 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
                 ActivityIndicator.shared.hide()
             })
         }
-}
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-       
     }
-    @IBAction func ActnImagePickerCamera(_ sender: Any)
-    {
+    
+    @IBAction func ActnImagePickerCamera(_ sender: Any) {
         let pickerView = UIImagePickerController()
         pickerView.delegate = self
         pickerView.sourceType = .photoLibrary
         let alert:UIAlertController=UIAlertController(title: "Choose Image", message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
-        let cameraAction = UIAlertAction(title: "Camera", style: UIAlertActionStyle.default)
-        {
+        let cameraAction = UIAlertAction(title: "Camera", style: UIAlertActionStyle.default) {
             UIAlertAction in
             self.openCamera()
         }
-        let gallaryAction = UIAlertAction(title: "Photo Gallery", style: UIAlertActionStyle.default)
-        {
+        let gallaryAction = UIAlertAction(title: "Photo Gallery", style: UIAlertActionStyle.default) {
             UIAlertAction in
             self.openGallary()
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel)
-        {
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel) {
             UIAlertAction in
         }
         // Add the actions
@@ -263,136 +302,111 @@ class EditProfileVc: UIViewController,UIImagePickerControllerDelegate,UINavigati
         alert.addAction(cancelAction)
         self.present(alert, animated: true, completion: nil)
     }
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String: Any]) {
-        
         let image = info[UIImagePickerControllerOriginalImage] as! UIImage
         UserImage.image = imageOrientation(image)
         dismiss(animated: true, completion: nil)
     }
-    func openCamera()
-    {
- if(UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera))
-        {
+    
+    func openCamera() {
+        if(UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)) {
             imagePicker.sourceType = UIImagePickerControllerSourceType.camera
             self .present(imagePicker, animated: true, completion: nil)
-        }
-        else
-        {
+        } else {
             let alertWarning = UIAlertView(title:"Warning", message: "You don't have camera", delegate:nil, cancelButtonTitle:"OK", otherButtonTitles:"Cancel")
             alertWarning.show()
         }
     }
-    func openGallary()
-    {
+    
+    func openGallary() {
         imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
         self.present(imagePicker, animated: true, completion: nil)
     }
-    @IBAction func ActnBack(_ sender: UIButton)
-    {
+    
+    @IBAction func ActnBack(_ sender: UIButton) {
         self.ActnTickBtnSave(sender)
     }
-    @IBAction func ActnTickBtnSave(_ sender: UIButton)
-    {
-        if TxtProfession.text! == "" || TxtUserName.text! == "" || TxtAddress.text! == "" || TxtMobileNo.text == "" || TxtEmail.text! == ""
-        {
+    
+    @IBAction func ActnTickBtnSave(_ sender: UIButton) {
+        if TxtProfession.text! == "" || TxtUserName.text! == "" || TxtAddress.text! == "" || TxtMobileNo.text == "" || TxtEmail.text! == "" {
             let alert = UIAlertController(title: "MESSAGE", message: "All fields are required", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler:nil))
             self.present(alert, animated: true, completion: nil)
-        }
-        else
-        {
+        } else {
             User.iswhichUser = "0"
             self.postEditUserProfile()
         }
     }
-    
-    
 }
-extension EditProfileVc :UITextFieldDelegate,UIPickerViewDelegate,UIPickerViewDataSource
-{
-    func numberOfComponents(in pickerView: UIPickerView) -> Int
-    {
+
+extension EditProfileVc :UITextFieldDelegate,UIPickerViewDelegate,UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int
-    {
-        if picker.tag == 0 || picker.tag == 1
-        {
-        return ProfessionArray.count
-        }else
-        {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        if picker.tag == 0 || picker.tag == 1 {
+            return ProfessionArray.count
+        } else {
             return RenewalCyleArray.count
         }
     }
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String?
-    {
-        if picker.tag == 0 || picker.tag == 1
-        {
-        let value = ProfessionArray[row]
-        return (value["name"] as? String)
-        }else
-        {
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        if picker.tag == 0 || picker.tag == 1 {
+            let value = ProfessionArray[row]
+            return (value["name"] as? String)
+        } else {
             return RenewalCyleArray[row]
         }
     }
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int)
-    {
-        if picker.tag == 0
-        {
-        let value = ProfessionArray[row]
-        profid = value["id"] as! String
-        TxtProfession.text = (value["name"] as! String)
-        }else if picker.tag == 1
-        {
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        if picker.tag == 0 {
+            let value = ProfessionArray[row]
+            profid = value["id"] as! String
+            TxtProfession.text = (value["name"] as! String)
+        } else if picker.tag == 1 {
             let value = ProfessionArray[row]
             ProfId2 = value["id"] as! String
             TxtSecondProfession.text = (value["name"] as! String)
-        }else
-        {
+        } else {
             TxtRenewalcycle.text = RenewalCyleArray[row]
             RenewalCyleValueFroAPI = RenewalCycleIds[row]
         }
     }
     
-    func textFieldDidBeginEditing(_ textField: UITextField)
-    {
-        if textField == TxtProfession
-        {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField == TxtProfession {
             picker.tag = 0
             self.pickerVw(textField)
-        }else if textField == TxtDOB
-        {
+        } else if textField == TxtDOB {
               self.datePickerVw()
-        }else if textField == TxtAddress
-        {
+        } else if textField == TxtAddress {
+            isUserLocationUpdate = false
             searchBarBtnPressed(self)
-        }else if textField == TxtSecondProfession
-        {
+        } else if textField == TxtLocation {
+            isUserLocationUpdate = true
+            searchBarBtnPressed(self)
+        } else if textField == TxtSecondProfession {
            picker.tag = 1
            self.pickerVw(textField)
-        }else if textField == TxtRenewalcycle {
+        } else if textField == TxtRenewalcycle {
             picker.tag = 2
             self.pickerVw(textField)
         }
     }
-    func textFieldDidEndEditing(_ textField: UITextField)
-    {
-        if textField == TxtMobileNo
-        {
-            if TxtMobileNo.text == ""
-            {
-                
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField == TxtMobileNo {
+            if TxtMobileNo.text == "" {
                 UIAlertController.show(self, "Mobile No", "Fill Valid Phone Number")
             }
-        }else if textField == TxtEmail
-            {
-                if isValidEmail(testStr: TxtEmail.text!)
-                {
+        } else if textField == TxtEmail {
+                if isValidEmail(testStr: TxtEmail.text!) {
                   print("valid")
-                }
-                else
-                {
+                } else {
                     UIAlertController.show(self, "Email", "Enter valid Email")
                 }
             }
@@ -404,12 +418,22 @@ extension EditProfileVc: GMSAutocompleteViewControllerDelegate {
     // Handle the user's selection.
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         print(place)
-        userCurrentLocation = place.coordinate
-        TxtAddress.text = place.formattedAddress
-        CurrentLati = place.coordinate.latitude
-        CurrentLongi = place.coordinate.longitude
+        if isUserLocationUpdate {
+            let locationobj = CLLocation.init(latitude:  place.coordinate.latitude, longitude: place.coordinate.longitude)
+            TxtLocation.text = place.formattedAddress
+            UserDefaults.standard.set(location:locationobj, forKey:"myLocation")
+            UserDefaults.standard.set(place.formattedAddress, forKey:"useraddress")
+            UserDefaults.standard.synchronize()
+            isUserLocationUpdate = false
+        } else {
+            userCurrentLocation = place.coordinate
+            TxtAddress.text = place.formattedAddress
+            CurrentLati = place.coordinate.latitude
+            CurrentLongi = place.coordinate.longitude
+        }
         dismiss(animated: true, completion: nil)
     }
+    
     func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
         // TODO: handle the error.
         print("Error: ", error.localizedDescription)
