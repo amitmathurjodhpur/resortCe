@@ -29,11 +29,21 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(self.menuUpdateNotification),
+            name: Notification.Name("menuUpdateNotification"), object: nil)
         getCurrentLocation()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.userprofile()
         }
       }
+    
+    @objc func menuUpdateNotification(notification: Notification) {
+         getHotelsNearBy()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: Notification.Name("menuUpdateNotification"), object: nil)
+    }
     
     func getHotelsNearBy() {
          if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
@@ -109,7 +119,6 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.isNavigationBarHidden = true
-        getHotelsNearBy()
     }
     
    func OkAction(action: UIAlertAction) {

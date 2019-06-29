@@ -24,7 +24,6 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         if showTripsOnly {
             self.navigationItem.setHidesBackButton(true, animated:true)
             let barButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(dismissView))
@@ -259,7 +258,23 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                 } else if indexPath.section == 1 {
                     vc?.currentTripId = inProgressTrips[indexPath.row].tripeId
                     self.navigationController?.pushViewController(vc!, animated: true)
-                } 
+                } else if indexPath.section == 2 {
+                    vc?.currentTripId = completedTrips[indexPath.row].tripeId
+                    self.navigationController?.pushViewController(vc!, animated: true)
+            }
+        } else {
+            if indexPath.section == 0 {
+                let vc = storyboard?.instantiateViewController(withIdentifier: "FirstVc") as? FirstVc
+                vc?.getReview = inProgressCourses[indexPath.row].courseId
+                self.navigationController?.pushViewController(vc!, animated: false)
+                
+            } else if indexPath.section == 1 {
+                let  PostLectId = completedCourses[indexPath.row].courseId
+                let vc = storyboard?.instantiateViewController(withIdentifier: "AvailableLectVc") as? AvailableLectVc
+                vc?.detail = PostLectId
+                vc?.shouldShowBuyBtn = true
+                self.navigationController?.pushViewController(vc!, animated: true)
+            }
         }
     }
    

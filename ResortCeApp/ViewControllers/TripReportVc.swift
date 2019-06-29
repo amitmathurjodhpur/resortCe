@@ -96,11 +96,14 @@ class TripReportVc: UIViewController {
                             print("Successfully downloaded. Status code: \(statusCode)")
                         }
                         do {
-                            try FileManager.default.copyItem(at: tempLocalUrl, to: destinationFileUrl)
-                            UIAlertController.show(self, "Pdf", "Saved successfully")
+                            //try FileManager.default.copyItem(at: tempLocalUrl, to: destinationFileUrl)
+                            _ = try FileManager.default.replaceItemAt(destinationFileUrl, withItemAt: tempLocalUrl)
+                            //UIAlertController.show(self, "Pdf", "Saved successfully")
+                            self.shareDocument(filePath: destinationFileUrl)
                         } catch (let writeError) {
-                            UIAlertController.show(self, "Pdf", "AlreadyExists")
+                            //UIAlertController.show(self, "Pdf", "AlreadyExists")
                             print("Error creating a file \(destinationFileUrl) : \(writeError)")
+                            self.shareDocument(filePath: destinationFileUrl)
                         }
                     } else {
                         print("Error took place while downloading a file. Error description: %@", error?.localizedDescription ?? "")
@@ -108,6 +111,15 @@ class TripReportVc: UIViewController {
                 }
                 task.resume()
             }
+        }
+    }
+    
+    func shareDocument(filePath: URL) {
+        print("File URL: \(filePath.relativePath)")
+        let url =  NSURL.fileURL(withPath: filePath.relativePath)
+        let activityViewController = UIActivityViewController(activityItems: [url] , applicationActivities: nil)
+        DispatchQueue.main.async {
+            self.present(activityViewController, animated: true, completion: nil)
         }
     }
     

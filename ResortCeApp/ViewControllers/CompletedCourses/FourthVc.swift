@@ -90,7 +90,7 @@ class FourthVc: UIViewController,UIWebViewDelegate {
         if let navController = self.navigationController {
             let viewControllers: [UIViewController] = navController.viewControllers
             for aViewController in viewControllers {
-                if aViewController is LockerVc {
+                if (aViewController is LockerVc ||  aViewController is TripTrackerViewController) {
                     navController.popToViewController(aViewController, animated: true)
                 }
             }

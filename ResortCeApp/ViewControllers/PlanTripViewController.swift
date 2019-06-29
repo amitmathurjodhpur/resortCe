@@ -62,12 +62,40 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
         super.viewDidLoad()
         configureView()
         if isEditMode == true {
+            segmentView.isUserInteractionEnabled = true
             pageTitle.text = "Edit Trip"
             expenseTitle.text = "Edit Expenses"
             getTripData()
         } else {
+            segmentView.isUserInteractionEnabled = false
             pageTitle.text = "Add Trip"
             expenseTitle.text = "Add Expenses"
+        }
+    }
+    
+    @IBAction func tripValueChanged(_ sender: UISegmentedControl) {
+        if isEditMode == true {
+            if sender.selectedSegmentIndex == 0 {
+                UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
+                    self?.tipNameView.isHidden = false
+                    self?.courseView.isHidden = true
+                    self?.nextBtn.isHidden = true
+                    self?.expenseScrollView.isHidden = true
+                    self?.segmentView.selectedSegmentIndex = 0
+                })
+            } else if sender.selectedSegmentIndex == 1 {
+                UIView.transition(with: self.view, duration: 0.5, options: .preferredFramesPerSecond60, animations: {[weak self] in
+                    self?.tipNameView.isHidden = true
+                    self?.courseView.isHidden = true
+                    self?.nextBtn.isHidden = true
+                    self?.expenseScrollView.isHidden = false
+                    self?.expenseScrollView.delegate = self
+                    self?.segmentView.selectedSegmentIndex = 1
+                })
+            } else if sender.selectedSegmentIndex == 2 {
+                self.segmentView.selectedSegmentIndex = 1
+                self.moveToTrips()
+            }
         }
     }
     

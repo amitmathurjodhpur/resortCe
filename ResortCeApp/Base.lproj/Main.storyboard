@@ -541,13 +541,16 @@
                                 </subviews>
                                 <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                             </view>
-                            <segmentedControl opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bordered" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="RZU-7K-xhG">
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bordered" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="RZU-7K-xhG">
                                 <rect key="frame" x="0.0" y="56" width="320" height="29"/>
                                 <segments>
                                     <segment title="Trip Name"/>
                                     <segment title="Add Expenses"/>
                                     <segment title="Preview Courses"/>
                                 </segments>
+                                <connections>
+                                    <action selector="tripValueChanged:" destination="xnt-lY-7WC" eventType="valueChanged" id="fQR-dM-8Aj"/>
+                                </connections>
                             </segmentedControl>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Y7g-Hx-KyM">
                                 <rect key="frame" x="0.0" y="88" width="320" height="480"/>
@@ -3858,7 +3861,7 @@ WW91IEdvdCAQQWxsIHRoZSBRdWVzdGlvbnMgY29ycmVjdC4
                                             <constraint firstAttribute="width" constant="75" id="ik3-gS-Q5e"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                        <state key="normal" title="Download">
+                                        <state key="normal" title="Share">
                                             <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </state>
                                         <connections>
@@ -4204,7 +4207,7 @@ WW91IEdvdCAQQWxsIHRoZSBRdWVzdGlvbnMgY29ycmVjdC4
                                             <constraint firstAttribute="width" constant="75" id="tdJ-Qe-e70"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                        <state key="normal" title="Download">
+                                        <state key="normal" title="Share">
                                             <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </state>
                                         <connections>

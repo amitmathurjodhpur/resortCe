@@ -14,6 +14,7 @@ class CellMenu: UITableViewCell
     @IBOutlet weak var LblMenuName: UILabel!
     @IBOutlet weak var NotifyImg: UILabel!
 }
+
 class HomeMenuVc: UIViewController {
     @IBOutlet weak var TableVw: UITableView!
 //    var MenuArray : [String] = ["Home","Settings","My Account","My lectures","Notification","My Pdf","Log Out"]
@@ -130,6 +131,7 @@ class HomeMenuVc: UIViewController {
             self.view.frame = CGRect(x: -UIScreen.main.bounds.size.width, y: 0, width: UIScreen.main.bounds.size.width,height: UIScreen.main.bounds.size.height)
             self.view.layoutIfNeeded()
             self.view.backgroundColor = UIColor.clear
+            NotificationCenter.default.post(name: Notification.Name("menuUpdateNotification"), object: nil)
         }, completion: { (finished) -> Void in
             self.view.removeFromSuperview()
             self.removeFromParentViewController()
