@@ -116,7 +116,6 @@ class LockerVc: UIViewController{
                 ActivityIndicator.shared.hide()
             })
         }
-        
     }
     @IBAction func ActnBack(_ sender: Any)
     {

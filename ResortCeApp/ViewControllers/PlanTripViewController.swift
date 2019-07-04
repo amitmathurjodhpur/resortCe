@@ -225,6 +225,7 @@ class PlanTripViewController: UIViewController, CLLocationManagerDelegate,UISear
                                     self?.expenseScrollView.delegate = self
                                     self?.segmentView.selectedSegmentIndex = 1
                                     //self?.getCourseList()
+                                    NotificationCenter.default.post(name: Notification.Name("menuUpdateNotification"), object: nil)
                                 })
                             }
                         } else {

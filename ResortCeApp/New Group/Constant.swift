@@ -70,7 +70,7 @@ public struct API {
      public static let create_pdf_for_trip_certificate =          newAPIURL+"create_pdf_for_trip_certificate"
     public static let create_pdf_for_expenses =          newAPIURL+"create_pdf_for_expenses"
     public static let DeleteExpenses =          newAPIURL+"delete_expenses"
-   
+    public static let singleTripListing =          newAPIURL+"single_trip_listing"
     
 }
 

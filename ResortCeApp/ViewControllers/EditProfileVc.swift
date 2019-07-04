@@ -440,6 +440,12 @@ extension EditProfileVc: GMSAutocompleteViewControllerDelegate {
     }
     // User canceled the operation.
     func wasCancelled(_ viewController: GMSAutocompleteViewController) {
+        if isUserLocationUpdate {
+            TxtLocation.text = ""
+            UserDefaults.standard.removeObject(forKey:"myLocation")
+            UserDefaults.standard.removeObject(forKey:"useraddress")
+            UserDefaults.standard.synchronize()
+        }
         dismiss(animated: true, completion: nil)
     }
     // Turn the network activity indicator on and off again.

@@ -48,6 +48,7 @@ class HomeVc: UIViewController, NewUserDelegate, CLLocationManagerDelegate {
     func getHotelsNearBy() {
          if let userId = UserDefaults.standard.value(forKey: "userid") as? String {
             self.MenuArray.removeAll()
+            self.imageArray.removeAll()
             if let userLocation = UserDefaults.standard.location(forKey:"myLocation") {
                 userCurrentLat = userLocation.coordinate.latitude
                 userCurrentLong = userLocation.coordinate.longitude

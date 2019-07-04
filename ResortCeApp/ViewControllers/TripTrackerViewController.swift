@@ -32,13 +32,6 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
         
         tableView.estimatedRowHeight = 44.0
         tableView.rowHeight = UITableViewAutomaticDimension
-        if shouldShowCurrent {
-             self.title = "Trip Tracker"
-            getTripList()
-        } else {
-             self.title = "CE Tracker"
-            getCourseList()
-        }
        
         self.tableView.tableFooterView = UIView()
     }
@@ -49,6 +42,17 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.isNavigationBarHidden  = false
+        self.inProgressTrips.removeAll()
+        self.currentTrips.removeAll()
+        self.completedTrips.removeAll()
+        
+        if shouldShowCurrent {
+            self.title = "Trip Tracker"
+            getTripList()
+        } else {
+            self.title = "CE Tracker"
+            getCourseList()
+        }
     }
     
     func getTripList() {
@@ -259,8 +263,28 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
                     vc?.currentTripId = inProgressTrips[indexPath.row].tripeId
                     self.navigationController?.pushViewController(vc!, animated: true)
                 } else if indexPath.section == 2 {
-                    vc?.currentTripId = completedTrips[indexPath.row].tripeId
-                    self.navigationController?.pushViewController(vc!, animated: true)
+                    /*vc?.currentTripId = completedTrips[indexPath.row].tripeId
+                    self.navigationController?.pushViewController(vc!, animated: true)*/
+                    
+                    let alert:UIAlertController=UIAlertController(title: "Choose Option", message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
+                    let ReportAction = UIAlertAction(title: "Trip Report", style: UIAlertActionStyle.default)  {
+                        UIAlertAction in
+                        self.TripReport(indexPath.row)
+                    }
+                    let CerificateAction = UIAlertAction(title: "Edit", style: UIAlertActionStyle.default) {
+                        UIAlertAction in
+                        vc?.currentTripId = self.completedTrips[indexPath.row].tripeId
+                        self.navigationController?.pushViewController(vc!, animated: true)
+                    }
+                    let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel)  {
+                        UIAlertAction in
+                    }
+                    // Add the actions
+                    
+                    alert.addAction(ReportAction)
+                    alert.addAction(CerificateAction)
+                    alert.addAction(cancelAction)
+                    self.present(alert, animated: true, completion: nil)
             }
         } else {
             if indexPath.section == 0 {
@@ -277,9 +301,30 @@ class TripTrackerViewController: UIViewController, UITableViewDelegate, UITableV
             }
         }
     }
-   
-    // MARK: - Expand / Collapse Methods
     
+    func TripReport(_ indexPath:Int) {
+        if let authKey = UserDefaults.standard.value(forKey: "authKey") as? String {
+            let dic = ["trip_id": completedTrips[indexPath].tripeId, "auth_key": authKey]
+            ActivityIndicator.shared.show(self.view)
+            DataManager.postAPIWithParameters(urlString: API.singleTripListing, jsonString: dic as [String : AnyObject], success: {
+                sucess in
+                ActivityIndicator.shared.hide()
+                if let tripsObj = sucess["body"] as? [String:Any] {
+                    self.navigateTripReport(tripData: tripsObj)
+                }
+            }, failure: {
+                fail in
+                ActivityIndicator.shared.hide()
+            })
+        }
+    }
+    
+    func navigateTripReport(tripData: [String: Any]) {
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "TripReportVc") as? TripReportVc
+        vc?.GetReportTrip = tripData
+        self.navigationController?.pushViewController(vc!, animated: false)
+    }
+    // MARK: - Expand / Collapse Methods
     @objc func sectionHeaderWasTouched(_ sender: UITapGestureRecognizer) {
         let headerView = sender.view as! UITableViewHeaderFooterView
         let section    = headerView.tag
